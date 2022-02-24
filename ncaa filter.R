@@ -1,0 +1,1 @@
+NCAA <- filter(Softball, NCAA=="Yes")
