@@ -35,3 +35,8 @@ RegionalStats <- data.frame(rbind(NCAA2015,NCAA2016,NCAA2017,NCAA2018))
 
 #reorders columns so year is first
 RegionalStats <- RegionalStats[, c(32,1:31)]
+
+#Adds stats: fielding percentage, singles, total bases, double plays per game, slugging percentage, success rate of stolen bases
+#second line adds batting average
+RegionalStats <- mutate(RegionalStats, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, SlgPct = TB/AB, SuccessRate = SB/(SB+CS))
+RegionalStats <- mutate(RegionalStats, BA=H/AB)
