@@ -41,6 +41,9 @@ RegionalStats <- RegionalStats[, c(32,1:31)]
 RegionalStats <- mutate(RegionalStats, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, SlgPct = TB/AB, SuccessRate = SB/(SB+CS))
 RegionalStats <- mutate(RegionalStats, BA=H/AB)
 
-RegionalGames <- Regionals %>% full_join(RegionalStats, by = c("Home.Team" = "Name"),  suffix = c(".x", ".home")) %>% full_join(RegionalStats, by = c("Visiting.Team" = "Name"), suffix = c(".home",".visit"))
+#Joins Regionals and stats into one data frame by game
+RegionalGames <- Regionals %>% full_join(RegionalStats, by = c("Home.Team" = "Name", "Year"),  suffix = c(".x", ".home")) %>% full_join(RegionalStats, by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
 
+#removes extra "NA" rows for teams who were never home team
+RegionalGames <- RegionalGames %>% drop_na(Regional.Host)
 
