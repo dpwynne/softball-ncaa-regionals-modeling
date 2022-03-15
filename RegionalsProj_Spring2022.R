@@ -1,15 +1,15 @@
 #Read in the data
-Softball2015 <- read.csv("C:/Users/hurri/CSUF/Spring 2022/Softball/Softball2015.csv")
+Softball2015 <- read.csv("Softball2015.csv")
 View(Softball2015)
-Softball2016 <- read.csv("C:/Users/hurri/CSUF/Spring 2022/Softball/Softball2016.csv")
+Softball2016 <- read.csv("Softball2016.csv")
 View(Softball2016)
-Softball2017 <- read.csv("C:/Users/hurri/CSUF/Spring 2022/Softball/Softball2017.csv")
+Softball2017 <- read.csv("Softball2017.csv")
 View(Softball2017)
-Softball2018 <- read.csv("C:/Users/hurri/CSUF/Spring 2022/Softball/Softball2018.csv")
+Softball2018 <- read.csv("Softball2018.csv")
 View(Softball2018)
 
 #this is the google spreadsheet
-Regionals <- read.csv("C:/Users/hurri/CSUF/Spring 2022/Softball/NCAA Tournament Games 2015-2018 - Sheet1.csv")
+Regionals <- read.csv("NCAA Tournament Games 2015-2018 - Sheet1.csv")
 View(Regionals)
 
 library(tidyverse)
@@ -40,3 +40,7 @@ RegionalStats <- RegionalStats[, c(32,1:31)]
 #second line adds batting average
 RegionalStats <- mutate(RegionalStats, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, SlgPct = TB/AB, SuccessRate = SB/(SB+CS))
 RegionalStats <- mutate(RegionalStats, BA=H/AB)
+
+RegionalGames <- Regionals %>% full_join(RegionalStats, by = c("Home.Team" = "Name"),  suffix = c(".x", ".home")) %>% full_join(RegionalStats, by = c("Visiting.Team" = "Name"), suffix = c(".home",".visit"))
+
+
