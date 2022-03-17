@@ -1,0 +1,398 @@
+Year,Regional Host,Game Number,Home Team,Visiting Team,Home Score,Visiting Score,Innings
+2015,Florida,1,Hofstra,Fla. Atlantic,1,0,7
+2015,Florida,2,Florida,Florida A&M,6,0,7
+2015,Florida,3,Florida,Hofstra,7,0,7
+2015,Florida,4,Fla. Atlantic,Florida A&M,7,2,7
+2015,Florida,5,Fla. Atlantic,Hofstra,3,2,9
+2015,Florida,6,Fla. Atlantic,Florida,0,1,8
+2015,Oregon,1,North Dakota St.,Fresno St.,4,0,7
+2015,Oregon,2,Oregon,BYU,8,0,6
+2015,Oregon,3,Oregon,North Dakota St.,4,3,7
+2015,Oregon,4,Fresno St.,BYU,7,8,7
+2015,Oregon,5,BYU,North Dakota St.,0,7,7
+2015,Oregon,6,North Dakota St.,Oregon,1,6,7
+2015,Auburn,1,South Alabama,Chattanooga,11,1,5
+2015,Auburn,2,Auburn,Tennessee Tech,4,1,7
+2015,Auburn,3,Auburn,South Alabama,1,0,7
+2015,Auburn,4,Chattanooga,Tennessee Tech,2,8,7
+2015,Auburn,5,Tennessee Tech,South Alabama,3,9,7
+2015,Auburn,6,South Alabama,Auburn,4,7,7
+2015,Michigan,1,California,Pittsburgh,11,3,5
+2015,Michigan,2,Michigan,Oakland,9,1,6
+2015,Michigan,3,Michigan,California,9,1,6
+2015,Michigan,4,Pittsburgh,Oakland,6,3,7
+2015,Michigan,5,Pittsburgh,California,6,3,7
+2015,Michigan,6,Pittsburgh,Michigan,3,10,7
+2015,LSU,1,Arizona St.,Nebraska,5,2,7
+2015,LSU,2,LSU,Texas Southern,15,0,5
+2015,LSU,3,LSU,Arizona St.,0,1,7
+2015,LSU,4,Nebraska,Texas Southern,5,0,7
+2015,LSU,5,Nebraska,LSU,2,3,10
+2015,LSU,6,Arizona St.,LSU,0,5,7
+2015,LSU,7,LSU,Arizona St.,4,3,9
+2015,Alabama,1,Washington,USC Upstate,4,1,7
+2015,Alabama,2,Alabama,Fairfield,8,0,6
+2015,Alabama,3,Alabama,Washington,9,0,5
+2015,Alabama,4,USC Upstate,Fairfield,9,0,6
+2015,Alabama,5,Washington,USC Upstate,9,1,5
+2015,Alabama,6,Washington,Alabama,1,11,7
+2015,UCLA,1,Texas,San Diego St.,8,3,7
+2015,UCLA,2,UCLA,CSUN,9,1,5
+2015,UCLA,3,UCLA,Texas,4,1,7
+2015,UCLA,4,San Diego St.,CSUN,5,4,7
+2015,UCLA,5,San Diego St.,Texas,4,3,9
+2015,UCLA,6,San Diego St.,UCLA,0,8,6
+2015,Tennessee,1,Utah,Virginia Tech,6,1,7
+2015,Tennessee,2,Tennessee,Longwood,2,0,7
+2015,Tennessee,3,Tennessee,Utah,9,1,5
+2015,Tennessee,4,Virginia Tech,Longwood,4,6,8
+2015,Tennessee,5,Longwood,Utah,0,2,7
+2015,Tennessee,6,Utah,Tennessee,1,3,7
+2015,Florida St.,1,UCF,South Carolina,4,1,7
+2015,Florida St.,2,Florida St.,Dartmouth,5,1,7
+2015,Florida St.,3,Florida St.,UCF,2,1,7
+2015,Florida St.,4,South Carolina,Dartmouth,3,1,7
+2015,Florida St.,5,South Carolina,UCF,2,5,7
+2015,Florida St.,6,UCF,Florida St.,0,5,7
+2015,Missouri,1,Kansas,Louisville,1,0,7
+2015,Missouri,2,Missouri,Indiana St.,7,0,7
+2015,Missouri,3,Missouri,Kansas,5,3,7
+2015,Missouri,4,Louisville,Indiana St.,1,2,8
+2015,Missouri,5,Indiana St.,Kansas,0,2,7
+2015,Missouri,6,Kansas,Missouri,6,7,7
+2015,Oklahoma,1,Texas A&M,Lehigh,2,1,7
+2015,Oklahoma,2,Oklahoma,Central Ark.,8,0,5
+2015,Oklahoma,3,Oklahoma,Texas A&M,7,5,7
+2015,Oklahoma,4,Lehigh,Central Ark.,3,0,7
+2015,Oklahoma,5,Texas A&M,Lehigh,5,0,7
+2015,Oklahoma,6,Texas A&M,Oklahoma,0,2,7
+2015,Arizona,1,Minnesota,New Mexico St.,10,2,6
+2015,Arizona,2,Arizona,St. John's (NY),4,2,7
+2015,Arizona,3,Arizona,Minnesota,5,1,7
+2015,Arizona,4,New Mexico St.,St. John's (NY),9,6,7
+2015,Arizona,5,New Mexico St.,Minnesota,0,2,7
+2015,Arizona,6,Minnesota,Arizona,5,2,7
+2015,Arizona,7,Arizona,Minnesota,7,6,8
+2015,Louisiana,1,Baylor,Mississippi St.,8,4,7
+2015,Louisiana,2,Louisiana,Weber St.,11,0,5
+2015,Louisiana,3,Louisiana,Baylor,3,1,7
+2015,Louisiana,4,Mississippi St.,Weber St.,2,0,7
+2015,Louisiana,5,Mississippi St.,Baylor,0,2,7
+2015,Louisiana,6,Baylor,Louisiana,6,2,7
+2015,Louisiana,7,Louisiana,Baylor,9,1,6
+2015,Georgia,1,North Carolina,Northwestern,1,2,7
+2015,Georgia,2,Georgia,Central Conn. St.,6,1,7
+2015,Georgia,3,Western Ky.,Georgia,2,1,14
+2015,Georgia,4,Central Conn. St.,North Carolina,0,8,5
+2015,Georgia,5,Georgia,North Carolina,6,5,7
+2015,Georgia,6,Western Ky.,Georgia,3,12,5
+2015,Georgia,7,Georgia,Western Ky.,17,0,5
+2015,James Madison,1,NC State,Fordham,12,5,7
+2015,James Madison,2,James Madison,Binghamton,9,1,5
+2015,James Madison,3,James Madison,NC State,0,2,7
+2015,James Madison,4,Fordham,Binghamton,8,0,5
+2015,James Madison,5,Fordham,James Madison,2,1,7
+2015,James Madison,6,NC State,Fordham,2,1,7
+2015,Notre Dame,1,Kentucky,Northwestern,5,4,7
+2015,Notre Dame,2,Notre Dame,Ball St.,3,6,7
+2015,Notre Dame,3,Ball St.,Kentucky,0,5,7
+2015,Notre Dame,4,Northwestern,Notre Dame,5,14,5
+2015,Notre Dame,5,Ball St.,Notre Dame,4,15,5
+2015,Notre Dame,6,Notre Dame,Kentucky,3,4,7
+2016,Florida,1,Fla. Atlantic,UCF,0,1,7
+2016,Florida,2,Florida,Alabama St.,11,0,5
+2016,Florida,3,Florida,UCF,5,0,7
+2016,Florida,4,Alabama St.,Fla. Atlantic,0,8,7
+2016,Florida,5,UCF,Fla. Atlantic,2,1,8
+2016,Florida,6,Florida,UCF,8,0,5
+2016,Michigan,1,Notre Dame,Miami (OH),2,3,7
+2016,Michigan,2,Michigan,Valparaiso,8,0,5
+2016,Michigan,3,Miami (OH),Michigan,0,6,7
+2016,Michigan,4,Valparaiso,Notre Dame,0,8,5
+2016,Michigan,5,Miami (OH),Notre Dame,0,5,7
+2016,Michigan,6,Notre Dame,Michigan,2,6,7
+2016,Oklahoma,1,Ole Miss,Tulsa,5,1,7
+2016,Oklahoma,2,Oklahoma,Wichita St.,7,2,7
+2016,Oklahoma,3,Oklahoma,Ole Miss,9,1,5
+2016,Oklahoma,4,Tulsa,Wichita St.,2,1,7
+2016,Oklahoma,5,Wichita St.,Ole Miss,0,4,7
+2016,Oklahoma,6,Ole Miss,Oklahoma,3,0,7
+2016,Auburn,1,Oregon St.,USC Upstate,2,5,7
+2016,Auburn,2,Auburn,Jacksonville St.,2,1,7
+2016,Auburn,3,USC Upstate,Auburn,6,1,7
+2016,Auburn,4,Jacksonville St.,Oregon St.,5,4,14
+2016,Auburn,5,USC Upstate,Jacksonville St.,2,3,7
+2016,Auburn,6,Jacksonville St.,Auburn,2,14,5
+2016,Oregon,1,Baylor,Long Beach St.,3,2,7
+2016,Oregon,2,Oregon,Fordham,8,0,5
+2016,Oregon,3,Oregon,Baylor,6,0,7
+2016,Oregon,4,Long Beach St.,Fordham,9,1,6
+2016,Oregon,5,Long Beach St.,Baylor,2,11,7
+2016,Oregon,6,Baylor,Oregon,1,8,7
+2016,Alabama,1,California,Texas St.,1,0,7
+2016,Alabama,2,Alabama,Samford,3,0,7
+2016,Alabama,3,Alabama,California,3,1,7
+2016,Alabama,4,Texas St.,Samford,2,0,7
+2016,Alabama,5,Texas St.,California,3,4,7
+2016,Alabama,6,California,Alabama,0,8,7
+2016,James Madison,1,North Carolina,Longwood,6,4,7
+2016,James Madison,2,James Madison,Princeton,7,0,7
+2016,James Madison,3,James Madison,North Carolina,10,1,6
+2016,James Madison,4,Longwood,Princeton,2,1,7
+2016,James Madison,5,Longwood,North Carolina,5,4,9
+2016,James Madison,6,Longwood,James Madison,5,1,7
+2016,Florida St.,1,South Fla.,South Carolina,0,2,7
+2016,Florida St.,2,Florida St.,Florida A&M,1,0,7
+2016,Florida St.,3,South Carolina,Florida St.,0,4,7
+2016,Florida St.,4,Florida A&M,South Fla.,4,6,7
+2016,Florida St.,5,South Carolina,South Fla.,6,0,7
+2016,Florida St.,6,Florida St.,South Carolina,2,1,7
+2016,Kentucky,1,Utah,Illinois,1,0,7
+2016,Kentucky,2,Kentucky,Butler,6,1,7
+2016,Kentucky,3,Kentucky,Utah,0,3,7
+2016,Kentucky,4,Illinois,Butler,2,1,8
+2016,Kentucky,5,Illinois,Kentucky,2,3,8
+2016,Kentucky,6,Utah,Kentucky,0,4,7
+2016,Kentucky,7,Kentucky,Utah,3,5,7
+2016,LSU,1,McNeese,Arizona St.,5,2,7
+2016,LSU,2,LSU,LIU Brooklyn,10,2,6
+2016,LSU,3,LSU,McNeese,4,1,7
+2016,LSU,4,Arizona St.,LIU Brooklyn,1,0,7
+2016,LSU,5,Arizona St.,McNeese,3,2,14
+2016,LSU,6,Arizona St.,LSU,0,2,7
+2016,Washington,1,Minnesota,North Dakota St.,7,2,7
+2016,Washington,2,Washington,Weber St.,14,6,5
+2016,Washington,3,Washington,Minnesota,5,2,7
+2016,Washington,4,North Dakota St.,Weber St.,5,2,7
+2016,Washington,5,North Dakota St.,Minnesota,5,7,7
+2016,Washington,6,Minnesota,Washington,7,15,6
+2016,UCLA,1,Fresno St.,Cal St. Fullerton,4,6,7
+2016,UCLA,2,UCLA,CSU Bakersfield,7,0,7
+2016,UCLA,3,Cal St. Fullerton,UCLA,2,3,7
+2016,UCLA,4,CSU Bakersfield,Fresno St.,5,8,7
+2016,UCLA,5,Cal St. Fullerton,Fresno St.,7,1,7
+2016,UCLA,6,UCLA,Cal St. Fullerton,5,4,7
+2016,Tennessee,1,Arizona,Ohio St.,2,0,7
+2016,Tennessee,2,Tennessee,Marist,10,2,6
+2016,Tennessee,3,Tennessee,Arizona,0,4,7
+2016,Tennessee,4,Ohio St.,Marist,6,1,7
+2016,Tennessee,5,Ohio St.,Tennessee,1,10,5
+2016,Tennessee,6,Arizona,Tennessee,4,3,8
+2016,Louisiana,1,Texas A&M,Texas,0,5,7
+2016,Louisiana,2,Louisiana,Boston U.,9,5,7
+2016,Louisiana,3,Texas,Louisiana,1,9,7
+2016,Louisiana,4,Boston U.,Texas A&M,0,6,7
+2016,Louisiana,5,Texas,Texas A&M,3,9,7
+2016,Louisiana,6,Texas A&M,Louisiana,8,9,9
+2016,Missouri,1,Nebraska,Louisville,3,2,7
+2016,Missouri,2,Missouri,BYU,9,0,5
+2016,Missouri,3,Missouri,Nebraska,8,0,6
+2016,Missouri,4,Louisville,BYU,4,6,7
+2016,Missouri,5,BYU,Nebraska,0,2,7
+2016,Missouri,6,Nebraska,Missouri,0,9,5
+2016,Georgia,1,Oklahoma St.,Northwestern,1,2,7
+2016,Georgia,2,Georgia,Maine,6,0,7
+2016,Georgia,3,Northwestern,Georgia,2,5,7
+2016,Georgia,4,Maine,Oklahoma St.,1,10,7
+2016,Georgia,5,Northwestern,Oklahoma St.,2,3,9
+2016,Georgia,6,Oklahoma St.,Georgia,5,3,7
+2016,Georgia,7,Georgia,Oklahoma St.,6,0,7
+2017,Florida,1,Oklahoma St.,FIU,2,0,7
+2017,Florida,2,Florida,Florida A&M,9,0,5
+2017,Florida,3,Florida,Oklahoma St.,2,0,7
+2017,Florida,4,FIU,Florida A&M,3,0,7
+2017,Florida,5,FIU,Oklahoma St.,0,5,7
+2017,Florida,6,Oklahoma St.,Florida,1,0,7
+2017,Florida,7,Florida,Oklahoma St.,5,0,7
+2017,Arizona,1,South Carolina,Saint Francis (PA),12,2,5
+2017,Arizona,2,Arizona,New Mexico St.,11,0,5
+2017,Arizona,3,Arizona,South Carolina,5,0,7
+2017,Arizona,4,Saint Francis (PA),New Mexico St.,8,4,7
+2017,Arizona,5,Saint Francis (PA),South Carolina,1,3,7
+2017,Arizona,6,South Carolina,Arizona,0,9,7
+2017,Oregon,1,Missouri,Wisconsin,2,7,4
+2017,Oregon,2,Oregon,UIC,13,0,5
+2017,Oregon,3,Wisconsin,Oregon,5,6,8
+2017,Oregon,4,UIC,Missouri,5,4,7
+2017,Oregon,5,Wisconsin,UIC,2,0,7
+2017,Oregon,6,Oregon,Wisconsin,9,0,5
+2017,Florida St.,1,Georgia,Jacksonville St.,4,2,7
+2017,Florida St.,2,Florida St.,Princeton,3,0,7
+2017,Florida St.,3,Florida St.,Georgia,7,1,7
+2017,Florida St.,4,Jacksonville St.,Princeton,10,2,6
+2017,Florida St.,5,Jacksonville St.,Georgia,2,8,7
+2017,Florida St.,6,Georgia,Florida St.,8,5,7
+2017,UCLA,1,Cal St. Fullerton,San Jose St.,0,3,7
+2017,UCLA,2,UCLA,Lehigh,8,0,5
+2017,UCLA,3,San Jose St.,UCLA,2,10,6
+2017,UCLA,4,Lehigh,Cal St. Fullerton,8,10,7
+2017,UCLA,5,San Jose St.,Cal St. Fullerton,0,1,7
+2017,UCLA,6,Cal St. Fullerton,UCLA,1,9,7
+2017,Washington,1,Michigan,Fresno St.,3,1,7
+2017,Washington,2,Washington,Montana,8,0,5
+2017,Washington,3,Washington,Michigan,12,4,5
+2017,Washington,4,Fresno St.,Montana,7,0,7
+2017,Washington,5,Fresno St.,Michigan,0,4,7
+2017,Washington,6,Michigan,Washington,4,2,7
+2017,Auburn,1,California,Notre Dame,6,2,7
+2017,Auburn,2,Auburn,ETSU,11,0,5
+2017,Auburn,3,Auburn,California,4,3,9
+2017,Auburn,4,Notre Dame,ETSU,7,6,8
+2017,Auburn,5,California,Notre Dame,4,3,
+2017,Auburn,6,Notre Dame,California,3,5,7
+2017,Auburn,7,California,Auburn,8,2,7
+2017,Tennessee,1,Ohio St.,USC Upstate,3,7,7
+2017,Tennessee,2,Tennessee,Longwood,5,0,7
+2017,Tennessee,3,USC Upstate,Tennessee,3,7,7
+2017,Tennessee,4,Longwood,Ohio St.,3,1,7
+2017,Tennessee,5,USC Upstate,Longwood,2,4,7
+2017,Tennessee,6,Longwood,Tennessee,0,3,7
+2017,Texas A&M,1,Texas St.,Texas,2,1,12
+2017,Texas A&M,2,Texas A&M,Texas Southern,14,0,5
+2017,Texas A&M,3,Texas A&M,Texas St.,3,1,7
+2017,Texas A&M,4,Texas,Texas Southern,8,0,5
+2017,Texas A&M,5,Texas,Texas St.,6,3,7
+2017,Texas A&M,6,Texas,Texas A&M,1,3,7
+2017,Oklahoma,1,Tulsa,Arkansas,5,4,7
+2017,Oklahoma,2,Oklahoma,North Dakota St.,2,3,9
+2017,Oklahoma,3,North Dakota St.,Tulsa,1,2,7
+2017,Oklahoma,4,Arkansas,Oklahoma,3,5,7
+2017,Oklahoma,5,North Dakota St.,Oklahoma,2,10,6
+2017,Oklahoma,6,Oklahoma,Tulsa,4,2,10
+2017,Oklahoma,7,Tulsa,Oklahoma,0,3,7
+2017,Utah,1,BYU,Mississippi St.,8,0,6
+2017,Utah,2,Utah,Fordham,10,0,5
+2017,Utah,3,Utah,BYU,3,2,7
+2017,Utah,4,Mississippi St.,Fordham,3,9,7
+2017,Utah,5,Fordham,BYU,1,12,5
+2017,Utah,6,BYU,Utah,0,14,6
+2017,Ole Miss,1,Arizona St.,North Carolina,9,3,7
+2017,Ole Miss,2,Ole Miss,Southern Ill.,8,0,5
+2017,Ole Miss,3,Ole Miss,Arizona St.,2,0,7
+2017,Ole Miss,4,North Carolina,Southern Ill.,4,0,7
+2017,Ole Miss,5,North Carolina,Arizona St.,3,2,7
+2017,Ole Miss,6,North Carolina,Ole Miss,2,7,7
+2017,Louisiana,1,Louisiana,McNeese,6,0,7
+2017,Louisiana,2,LSU,Fairfield,2,1,7
+2017,Louisiana,3,LSU,Louisiana,2,4,7
+2017,Louisiana,4,McNeese,Fairfield,6,2,7
+2017,Louisiana,5,McNeese,LSU,1,10,6
+2017,Louisiana,6,Louisiana,LSU,1,6,7
+2017,Louisiana,7,LSU,Louisiana,5,1,7
+2017,Kentucky,1,Illinois,Marshall,3,2,12
+2017,Kentucky,2,Kentucky,DePaul,6,0,7
+2017,Kentucky,3,Kentucky,Illinois,1,0,7
+2017,Kentucky,4,Marshall,DePaul,2,1,8
+2017,Kentucky,5,Marshall,Illinois,2,10,5
+2017,Kentucky,6,Illinois,Kentucky,2,4,7
+2017,Baylor,1,James Madison,Oregon St.,3,2,7
+2017,Baylor,2,Baylor,Kent St.,1,0,7
+2017,Baylor,3,Baylor,James Madison,4,2,7
+2017,Baylor,4,Oregon St.,Kent St.,1,2,7
+2017,Baylor,5,Kent St.,James Madison,0,4,7
+2017,Baylor,6,James Madison,Baylor,0,1,7
+2017,Alabama,1,Minnesota,Louisiana Tech,11,3,5
+2017,Alabama,2,Alabama,Albany (NY),5,1,7
+2017,Alabama,3,Alabama,Minnesota,1,0,9
+2017,Alabama,4,Louisiana Tech,Albany (NY),8,1,7
+2017,Alabama,5,Louisiana Tech,Minnesota,2,5,9
+2017,Alabama,6,Minnesota,Alabama,0,1,7
+2018,Oregon,1,Drake,BYU,3,2,7
+2018,Oregon,2,Oregon,Albany (NY),4,0,7
+2018,Oregon,3,Oregon,Drake,5,0,7
+2018,Oregon,4,BYU,Albany (NY),16,0,5
+2018,Oregon,5,BYU,Drake,0,3,7
+2018,Oregon,6,Drake,Oregon,0,3,7
+2018,Florida,1,Ohio St.,South Fla.,3,1,7
+2018,Florida,2,Florida,Bethune-Cookman,8,0,6
+2018,Florida,3,Florida,Ohio St.,10,2,6
+2018,Florida,4,South Fla.,Bethune-Cookman,3,0,7
+2018,Florida,5,Ohio St.,South Fla.,3,2,7
+2018,Florida,6,Ohio St.,Florida,0,4,7
+2018,UCLA,1,Texas St.,Cal St. Fullerton,1,2,7
+2018,UCLA,2,UCLA,Sacramento St.,3,0,7
+2018,UCLA,3,Cal St. Fullerton,UCLA,3,2,9
+2018,UCLA,4,Sacramento St.,Texas St.,4,8,7
+2018,UCLA,5,UCLA,Texas St.,14,1,5
+2018,UCLA,6,Cal St. Fullerton,UCLA,0,3,7
+2018,UCLA,7,UCLA,Cal St. Fullerton,4,6,7
+2018,Oklahoma,1,Missouri,Tulsa,1,9,5
+2018,Oklahoma,2,Oklahoma,Boston U.,9,0,5
+2018,Oklahoma,3,Tulsa,Oklahoma,0,8,6
+2018,Oklahoma,4,Boston U.,Missouri,8,10,7
+2018,Oklahoma,5,Tulsa,Missouri,5,6,7
+2018,Oklahoma,6,Missouri,Oklahoma,0,7,7
+2018,Washington,1,Minnesota,Texas,1,2,7
+2018,Washington,2,Washington,Boise St.,8,0,5
+2018,Washington,3,Texas,Washington,1,2,7
+2018,Washington,4,Boise St.,Minnesota,3,11,7
+2018,Washington,5,Texas,Minnesota,0,3,7
+2018,Washington,6,Minnesota,Washington,2,5,7
+2018,Florida St.,1,Auburn,Kennesaw St.,5,2,7
+2018,Florida St.,2,Florida St.,Jacksonville St.,8,0,5
+2018,Florida St.,3,Florida St.,Auburn,2,1,8
+2018,Florida St.,4,Kennesaw St.,Jacksonville St.,3,5,10
+2018,Florida St.,5,Jacksonville St.,Auburn,3,2,7
+2018,Florida St.,6,Jacksonville St.,Florida St.,0,10,7
+2018,Georgia,1,California,Northwestern,2,3,8
+2018,Georgia,2,Georgia,Harvard,6,2,7
+2018,Georgia,3,Northwestern,Georgia,0,12,6
+2018,Georgia,4,Harvard,California,1,10,5
+2018,Georgia,5,Northwestern,California,4,3,7
+2018,Georgia,6,Georgia,Northwestern,9,7,7
+2018,Arizona St.,1,Long Beach St.,Ole Miss,1,9,7
+2018,Arizona St.,2,Arizona St.,New Mexico St.,2,0,7
+2018,Arizona St.,3,Ole Miss,Arizona St.,1,7,7
+2018,Arizona St.,4,New Mexico St.,Long Beach St.,0,9,5
+2018,Arizona St.,5,Ole Miss,Long Beach St.,1,0,7
+2018,Arizona St.,6,Arizona St.,Ole Miss,9,0,5
+2018,South Carolina,1,Hofstra,Liberty,0,2,10
+2018,South Carolina,2,South Carolina,UNC Greensboro,3,0,7
+2018,South Carolina,3,Liberty,South Carolina,3,1,7
+2018,South Carolina,4,UNC Greensboro,Hofstra,0,6,7
+2018,South Carolina,5,South Carolina,Hofstra,5,4,7
+2018,South Carolina,6,Liberty,South Carolina,0,2,7
+2018,South Carolina,7,South Carolina,Liberty,5,0,7
+2018,Tennessee,1,James Madison,Ohio,2,1,7
+2018,Tennessee,2,Tennessee,Monmouth,9,0,5
+2018,Tennessee,3,Tennessee,James Madison,12,3,6
+2018,Tennessee,4,Ohio,Monmouth,4,0,7
+2018,Tennessee,5,Ohio,James Madison,7,3,7
+2018,Tennessee,6,Ohio,Tennessee,1,5,7
+2018,Louisiana,1,Louisiana,Houston,0,1,7
+2018,Louisiana,2,LSU,Fordham,9,0,5
+2018,Louisiana,3,Houston,LSU,0,1,7
+2018,Louisiana,4,Fordham,Louisiana,3,15,5
+2018,Louisiana,5,Houston,Louisiana,2,7,7
+2018,Louisiana,6,Louisiana,LSU,5,4,10
+2018,Louisiana,7,LSU,Louisiana,3,1,7
+2018,Alabama,1,Oregon St.,Wisconsin,3,9,8
+2018,Alabama,2,Alabama,Middle Tenn.,8,0,6
+2018,Alabama,3,Wisconsin,Alabama,1,9,6
+2018,Alabama,4,Middle Tenn.,Oregon St.,0,4,7
+2018,Alabama,5,Wisconsin,Oregon St.,1,5,7
+2018,Alabama,6,Oregon St.,Alabama,0,6,7
+2018,Arkansas,1,Oklahoma St.,Wichita St.,2,8,7
+2018,Arkansas,2,Arkansas,DePaul,2,0,7
+2018,Arkansas,3,Wichita St.,Arkansas,0,5,7
+2018,Arkansas,4,DePaul,Oklahoma St.,0,6,7
+2018,Arkansas,5,Wichita St.,Oklahoma St.,5,4,7
+2018,Arkansas,6,Arkansas,Wichita St.,6,4,7
+2018,Arizona,1,Mississippi Val.,North Dakota St.,4,5,7
+2018,Arizona,2,Arizona,Saint Francis (PA),1,0,7
+2018,Arizona,3,North Dakota St.,Arizona,0,6,7
+2018,Arizona,4,Saint Francis (PA),Mississippi Val.,5,11,7
+2018,Arizona,5,North Dakota St.,Mississippi Val.,0,12,5
+2018,Arizona,6,Mississippi Val.,Arizona,3,4,7
+2018,Texas A&M,1,Baylor,McNeese,10,11,7
+2018,Texas A&M,2,Texas A&M,Prairie View,9,0,5
+2018,Texas A&M,3,McNeese,Texas A&M,1,10,6
+2018,Texas A&M,4,Prairie View,Baylor,0,9,5
+2018,Texas A&M,5,McNeese,Baylor,0,6,7
+2018,Texas A&M,6,Baylor,Texas A&M,4,10,7
+2018,Kentucky,1,Michigan,Notre Dame,1,4,7
+2018,Kentucky,2,Kentucky,UIC,10,1,5
+2018,Kentucky,3,UIC,Michigan,0,6,7
+2018,Kentucky,4,Notre Dame,Kentucky,0,10,5
+2018,Kentucky,5,Notre Dame,Michigan,2,1,7
+2018,Kentucky,6,Kentucky,Notre Dame,8,0,6
