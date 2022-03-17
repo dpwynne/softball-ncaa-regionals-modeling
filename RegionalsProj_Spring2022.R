@@ -9,7 +9,7 @@ Softball2018 <- read.csv("Softball2018.csv")
 View(Softball2018)
 
 #this is the google spreadsheet
-Regionals <- read.csv("NCAA Tournament Games 2015-2018 - Sheet1.csv")
+Regionals <- read.csv("Data/NCAA Tournament Games 2015-2018 - Sheet1.csv")
 View(Regionals)
 
 library(tidyverse)
@@ -42,8 +42,6 @@ RegionalStats <- mutate(RegionalStats, FieldingPct = (PO+A)/(PO+A+E), Singles = 
 RegionalStats <- mutate(RegionalStats, BA=H/AB)
 
 #Joins Regionals and stats into one data frame by game
-RegionalGames <- Regionals %>% full_join(RegionalStats, by = c("Home.Team" = "Name", "Year"),  suffix = c(".x", ".home")) %>% full_join(RegionalStats, by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
+RegionalGames <- Regionals %>% left_join(RegionalStats, by = c("Home.Team" = "Name", "Year"),  suffix = c(".x", ".home")) %>% left_join(RegionalStats, by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
 
-#removes extra "NA" rows for teams who were never home team
-RegionalGames <- RegionalGames %>% drop_na(Regional.Host)
 
