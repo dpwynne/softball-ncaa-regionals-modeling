@@ -48,10 +48,10 @@ RegionalGames <- Regionals %>% left_join(RegionalStats, by = c("Home.Team" = "Na
 RegionalGames <- mutate(RegionalGames, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
 
 #Adds column indicating run differental (absolute value of Home-Visiting runs)
-RegionalGames <- mutate(RegionalGames, Run.Diff = abs(Home.Score-Visiting.Score))
+RegionalGames <- mutate(RegionalGames, Run.Diff = Home.Score-Visiting.Score)
 
 #Creates new data frame that standardizes important variables
-RegionalGames_Std <- mutate(RegionalGames, Run.Diff = abs(Home.Score-Visiting.Score),
+RegionalGames_Std <- mutate(RegionalGames, Run.Diff = Home.Score-Visiting.Score,
                         Singles.home = Singles.home/G.home, Singles.visit=Singles.visit/G.visit,
                         TB.home=TB.home/G.home, TB.visit=TB.visit/G.visit, 
                         Doubles.home=Doubles.home/G.home, Doubles.visit=Doubles.visit/G.visit,
@@ -81,9 +81,17 @@ print(FieldingPctRuns)
 BattingAvg <- ggplot(data=RegionalGames_Std)+geom_point(mapping=aes(x=BA.home, y=BA.visit, color=Home.Win))
 print(BattingAvg)
 
-#Next I want to change the run differential to include negatives rather than abs value to make the gradient easier to read
-#also want to plot more offensive stats
+#Plots home runs
+HomeRuns <- ggplot(data=RegionalGames_Std)+geom_point(mapping=aes(x=HR.home, y=HR.visit, color=Home.Win))
+print(HomeRuns)
+HomeRuns2 <- ggplot(data=RegionalGames_Std)+geom_point(mapping=aes(x=HR.home, y=HR.visit, color=Run.Diff))
+print(HomeRuns2)
 
+#plots stolen bases
+StolenBases <- ggplot(data=RegionalGames_Std)+geom_point(mapping=aes(x=SB.home, y=SB.visit, color=Home.Win))
+print(StolenBases)
+StolenBases2 <- ggplot(data=RegionalGames_Std)+geom_point(mapping=aes(x=SB.home, y=SB.visit, color=Run.Diff))
+print(StolenBases2)
 
 
 
