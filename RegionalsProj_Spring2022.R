@@ -44,4 +44,47 @@ RegionalStats <- mutate(RegionalStats, BA=H/AB)
 #Joins Regionals and stats into one data frame by game
 RegionalGames <- Regionals %>% left_join(RegionalStats, by = c("Home.Team" = "Name", "Year"),  suffix = c(".x", ".home")) %>% left_join(RegionalStats, by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
 
+#Adds column indicating home team win
+RegionalGames <- mutate(RegionalGames, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
+
+#Adds column indicating run differental (absolute value of Home-Visiting runs)
+RegionalGames <- mutate(RegionalGames, Run.Diff = abs(Home.Score-Visiting.Score))
+
+#Creates new data frame that standardizes important variables
+RegionalGames_Std <- mutate(RegionalGames, Run.Diff = abs(Home.Score-Visiting.Score),
+                        Singles.home = Singles.home/G.home, Singles.visit=Singles.visit/G.visit,
+                        TB.home=TB.home/G.home, TB.visit=TB.visit/G.visit, 
+                        Doubles.home=Doubles.home/G.home, Doubles.visit=Doubles.visit/G.visit,
+                        Triples.home=Triples.home/G.home, Triples.visit=Triples.visit/G.visit,
+                        HR.home=HR.home/G.home, HR.visit=HR.visit/G.visit,
+                        SB.home=SB.home/G.home, SB.visit=SB.visit/G.visit,
+                        CS.home=CS.home/G.home, CS.visit=CS.visit/G.visit,
+                        RunsScored.home=RunsScored.home/G.home, RunsScored.visit=RunsScored.visit/G.visit,
+                        PO.home=PO.home/G.home, PO.visit=PO.visit/G.visit,
+                        A.home=A.home/G.home, A.visit=A.visit/G.visit,
+                        E.home=E.home/G.home, E.visit=E.visit/G.visit,
+                        RunsAllowed.home=RunsAllowed.home/G.home, RunsAllowed.visit=RunsAllowed.visit/G.visit)
+
+#Plots double plays per game home vs away
+DoublePlays <- ggplot(data=RegionalGames_Std)+geom_point(mapping=aes(x=DPPerGame.home, y=DPPerGame.visit, color=Home.Win))
+print(DoublePlays)
+DoublePlaysRuns <- ggplot(data=RegionalGames_Std)+geom_point(mapping=aes(x=DPPerGame.home, y=DPPerGame.visit, color=Run.Diff))
+print(DoublePlaysRuns)
+
+#Plots fielding percentage home vs away
+FieldingPct <- ggplot(data=RegionalGames_Std)+geom_point(mapping=aes(x=FieldingPct.home, y=FieldingPct.visit, color=Home.Win))
+print(FieldingPct)
+FieldingPctRuns <- ggplot(data=RegionalGames_Std)+geom_point(mapping=aes(x=FieldingPct.home, y=FieldingPct.visit, color=Run.Diff))
+print(FieldingPctRuns)
+
+#Plots batting average home vs away
+BattingAvg <- ggplot(data=RegionalGames_Std)+geom_point(mapping=aes(x=BA.home, y=BA.visit, color=Home.Win))
+print(BattingAvg)
+
+#Next I want to change the run differential to include negatives rather than abs value to make the gradient easier to read
+#also want to plot more offensive stats
+
+
+
+
 
