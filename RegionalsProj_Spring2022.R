@@ -93,6 +93,40 @@ print(StolenBases)
 StolenBases2 <- ggplot(data=RegionalGames_Std)+geom_point(mapping=aes(x=SB.home, y=SB.visit, color=Run.Diff))
 print(StolenBases2)
 
+#creates boxplots based on difference b/w visiting and home in particular stat, filters games where host was neither team
+RegionalGames_Std %>% mutate(BA=BA.visit-BA.home) -> BA
+BA2 <- filter(BA, Regional.Host != Home.Team, Regional.Host != Visiting.Team)
+boxplot(BA~Home.Win, data=BA2)
+boxplot(BA.home~Home.Win, data=BA2)
+boxplot(BA.visit~Home.Win, data=BA2)
 
+RegionalGames_Std %>% mutate(HR=HR.visit-HR.home) -> HR 
+HR2 <- filter(HR, Regional.Host != Home.Team, Regional.Host != Visiting.Team)
+boxplot(HR~Home.Win, data=HR2)
+boxplot(HR.home~Home.Win, data=HR2)
+boxplot(HR.visit~Home.Win, data=HR2)
 
+#Adds column indicating if home team or visiting team (or neither) is regional host
+RegionalGames_Std <- mutate(RegionalGames_Std, 
+                            Host= case_when(Regional.Host==Home.Team~1, 
+                                            Regional.Host==Visiting.Team~-1,
+                                            Regional.Host != Home.Team & Regional.Host != Visiting.Team ~ 0) )
 
+#filters based on who was host (if any), also changed difference in BA
+RegionalGames_Std %>% mutate(BA=BA.home-BA.visit) -> BA
+BAhost.home <- filter(BA, Host==1)
+BAhost.visit <- filter(BA, Host==-1)
+BAhost.0 <- filter(BA, Host==0)
+BAbxplt.home <- boxplot(BA~Home.Win, data=BAhost.home)
+BAbxplt.visit <- boxplot(BA~Home.Win, data=BAhost.visit)
+BAbxplt.0 <- boxplot(BA~Home.Win, data=BAhost.0)
+
+#Wanted to see if Runs/Hit gave any explanation for BA not making sense
+#like lower batting avg but more runs per hit
+RegionalGames_Std %>% mutate(Runs.home=RunsScored.home/H.home, Runs.visit=RunsScored.visit/H.visit, Runs=Runs.home-Runs.visit) -> R
+Rhost.home <- filter(R, Host==1)
+Rhost.visit <- filter(R, Host==-1)
+Rhost.0 <- filter(R, Host==0)
+Rbxplt.home <- boxplot(Runs~Home.Win, data=Rhost.home)
+Rbxplt.visit <- boxplot(Runs~Home.Win, data=Rhost.visit)
+Rbxplt.0 <- boxplot(Runs~Home.Win, data=Rhost.0)
