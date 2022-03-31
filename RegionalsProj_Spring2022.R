@@ -160,19 +160,30 @@ Fieldingbxplt.home <- boxplot(Fielding~Home.Win, data=Fieldinghost.home, main="H
 Fieldingbxplt.visit <- boxplot(Fielding~Home.Win, data=Fieldinghost.visit, main="Visit Host")
 Fieldingbxplt.0 <- boxplot(Fielding~Home.Win, data=Fieldinghost.0, main="Neither Host")
 
+#slugging percentage boxplot
+#on base percentage
 
 #validation ~skeleton~ v1
 #takes a random assortment of test and train data
 dim(RegionalGames_Std)
+set.seed(19)
 obs=seq(1,397,1)
 random=sample(obs,97,replace=F)
 
-Train.random <- RegionalGames_Std[random,]
-Test.random <- RegionalGames_Std[-random,]
+Train.random <- RegionalGames_Std[-random,]
+Test.random <- RegionalGames_Std[random,]
 
 #fill in for stat and desired number of predictors below
-stat <- lm(stat ~ predictor1+predictor2+predictor3, data=Train.random)
-fit.stat <- predict(stat, newdata=Test.random)
+model1 <- lm(response ~ predictor1+predictor2+predictor3, data=Train.random)
+fit.stat <- predict(model1, newdata=Test.random)
+
+model1 <- lm(Run.Diff ~ (HR.home+HR.visit)*Host, data=Train.random)
+fit.model1 <- predict(model1, newdata=Test.random)
+predict_df <- Test.random %>% select(Run.Diff, HR.home, HR.visit, Host)%>%
+  mutate(predicted = fit.model1, residual=Run.Diff-predicted)
+mean(predict_df$residual^2)
+
+
 
 #validation ~skeleton~ v2
 #I think this is what we talked about doing initially
@@ -180,8 +191,8 @@ Years <- filter(RegionalGames_Std, Year!="2018")
 Test.2018 <- filter(RegionalGames_Std, Year=="2018")
 
 #fill in for stat and predictors
-stat <- lm(stat~predictor1+predictor2+predictor3, data=Years)
-fit.stat <- predict(stat, newdata=Test.2018)
+model2 <- lm(response~predictor1+predictor2+predictor3, data=Years)
+fit.model2 <- predict(model2, newdata=Test.2018)
 
 
 
