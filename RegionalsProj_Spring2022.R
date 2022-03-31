@@ -106,6 +106,7 @@ boxplot(HR~Home.Win, data=HR2)
 boxplot(HR.home~Home.Win, data=HR2)
 boxplot(HR.visit~Home.Win, data=HR2)
 
+
 #Adds column indicating if home team or visiting team (or neither) is regional host
 RegionalGames_Std <- mutate(RegionalGames_Std, 
                             Host= case_when(Regional.Host==Home.Team~1, 
@@ -117,9 +118,10 @@ RegionalGames_Std %>% mutate(BA=BA.home-BA.visit) -> BA
 BAhost.home <- filter(BA, Host==1)
 BAhost.visit <- filter(BA, Host==-1)
 BAhost.0 <- filter(BA, Host==0)
-BAbxplt.home <- boxplot(BA~Home.Win, data=BAhost.home)
-BAbxplt.visit <- boxplot(BA~Home.Win, data=BAhost.visit)
-BAbxplt.0 <- boxplot(BA~Home.Win, data=BAhost.0)
+BAbxplt.home <- boxplot(BA~Home.Win, data=BAhost.home, main ="Home team is Regional Host")
+#shows that home team won more when they had a lower batting avg, which doesn't make sense
+BAbxplt.visit <- boxplot(BA~Home.Win, data=BAhost.visit, main = "Visiting team is Regional Host")
+BAbxplt.0 <- boxplot(BA~Home.Win, data=BAhost.0, main = "Neither team is Regional Host")
 
 #Wanted to see if Runs/Hit gave any explanation for BA not making sense
 #like lower batting avg but more runs per hit
@@ -127,6 +129,60 @@ RegionalGames_Std %>% mutate(Runs.home=RunsScored.home/H.home, Runs.visit=RunsSc
 Rhost.home <- filter(R, Host==1)
 Rhost.visit <- filter(R, Host==-1)
 Rhost.0 <- filter(R, Host==0)
-Rbxplt.home <- boxplot(Runs~Home.Win, data=Rhost.home)
-Rbxplt.visit <- boxplot(Runs~Home.Win, data=Rhost.visit)
-Rbxplt.0 <- boxplot(Runs~Home.Win, data=Rhost.0)
+Rbxplt.home <- boxplot(Runs~Home.Win, data=Rhost.home, main="Home team is Regional Host")
+Rbxplt.visit <- boxplot(Runs~Home.Win, data=Rhost.visit, main = "Visiting team is Regional Host")
+Rbxplt.0 <- boxplot(Runs~Home.Win, data=Rhost.0, main = "Neither team is Regional Host")
+
+#repeats home run boxplots using filter
+RegionalGames_Std %>% mutate(HR = HR.home-HR.visit) -> HR
+HRhost.home <- filter(HR, Host==1)
+HRhost.visit <- filter(HR, Host==-1)
+HRhost.0 <- filter(HR, Host==0)
+HRbxplt.home <- boxplot(HR~Home.Win, data=HRhost.home, main="Home Host")
+HRbxplt.visit <- boxplot(HR~Home.Win, data=HRhost.visit, main="Visit Host")
+HRbxplt.0 <- boxplot(HR~Home.Win, data=HRhost.0, main="Neither Host")
+
+#again for stolen base success rate
+RegionalGames_Std %>% mutate(Success = SuccessRate.home-SuccessRate.visit) -> Success
+Successhost.home <- filter(Success, Host==1)
+Successhost.visit <- filter(Success, Host==-1)
+Successhost.0 <- filter(Success, Host==0)
+Successbxplt.home <- boxplot(Success~Home.Win, data=Successhost.home, main="Home Host")
+Successbxplt.visit <- boxplot(Success~Home.Win, data=Successhost.visit, main="Visit Host")
+Successbxplt.0 <- boxplot(Success~Home.Win, data=Successhost.0, main="Neither Host")
+
+#again for fielding percentage. This seems important!
+RegionalGames_Std %>% mutate(Fielding = FieldingPct.home-FieldingPct.visit) -> Fielding
+Fieldinghost.home <- filter(Fielding, Host==1)
+Fieldinghost.visit <- filter(Fielding, Host==-1)
+Fieldinghost.0 <- filter(Fielding, Host==0)
+Fieldingbxplt.home <- boxplot(Fielding~Home.Win, data=Fieldinghost.home, main="Home Host")
+Fieldingbxplt.visit <- boxplot(Fielding~Home.Win, data=Fieldinghost.visit, main="Visit Host")
+Fieldingbxplt.0 <- boxplot(Fielding~Home.Win, data=Fieldinghost.0, main="Neither Host")
+
+
+#validation ~skeleton~ v1
+#takes a random assortment of test and train data
+dim(RegionalGames_Std)
+obs=seq(1,397,1)
+random=sample(obs,97,replace=F)
+
+Train.random <- RegionalGames_Std[random,]
+Test.random <- RegionalGames_Std[-random,]
+
+#fill in for stat and desired number of predictors below
+stat <- lm(stat ~ predictor1+predictor2+predictor3, data=Train.random)
+fit.stat <- predict(stat, newdata=Test.random)
+
+#validation ~skeleton~ v2
+#I think this is what we talked about doing initially
+Years <- filter(RegionalGames_Std, Year!="2018")
+Test.2018 <- filter(RegionalGames_Std, Year=="2018")
+
+#fill in for stat and predictors
+stat <- lm(stat~predictor1+predictor2+predictor3, data=Years)
+fit.stat <- predict(stat, newdata=Test.2018)
+
+
+
+
