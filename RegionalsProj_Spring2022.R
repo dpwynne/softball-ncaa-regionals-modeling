@@ -14,6 +14,8 @@ View(Regionals)
 
 library(tidyverse)
 library(ggplot2)
+library(lattice)
+library(caret)
 
 #filters each data set into teams that went to Regionals
 NCAA2015 <- filter(Softball2015, NCAA %in% c("At-large","Auto"))
@@ -168,10 +170,10 @@ Fieldingbxplt.0 <- boxplot(Fielding~Home.Win, data=Fieldinghost.0, main="Neither
 dim(RegionalGames_Std)
 set.seed(19)
 obs=seq(1,397,1)
-random=sample(obs,97,replace=F)
+random=sample(obs,300,replace=F)
 
-Train.random <- RegionalGames_Std[-random,]
-Test.random <- RegionalGames_Std[random,]
+Train.random <- RegionalGames_Std[random,]
+Test.random <- RegionalGames_Std[-random,]
 
 #fill in for stat and desired number of predictors below
 model1 <- lm(response ~ predictor1+predictor2+predictor3, data=Train.random)
@@ -194,6 +196,103 @@ Test.2018 <- filter(RegionalGames_Std, Year=="2018")
 model2 <- lm(response~predictor1+predictor2+predictor3, data=Years)
 fit.model2 <- predict(model2, newdata=Test.2018)
 
+slg.runs <- lm(Run.Diff ~ (SlgPct.home+SlgPct.visit)*Host, data=Train.random)
+fit.slg.runs <- predict(slg.runs, newdata=Test.random)
+predict.slg.runs <- Test.random %>% select(Run.Diff, SlgPct.home, SlgPct.visit, Host)%>%
+  mutate(slg.predicted = fit.slg.runs, slg.residual=Run.Diff-slg.predicted)
+mean(predict.slg.runs$slg.residual^2)
+
+bat.runs <- lm(Run.Diff ~ (SlgPct.home + SlgPct.visit + BA.home + BA.visit)*Host, data=Train.random)
+fit.bat.runs <- predict(bat.runs, newdata=Test.random)
+predict.bat.runs <- Test.random %>% 
+  select(Run.Diff, SlgPct.home, SlgPct.visit, BA.home, BA.visit, Host) %>%
+  mutate(bat.predicted=fit.bat.runs, bat.residual=Run.Diff-bat.predicted)
+mean(predict.bat.runs$bat.residual^2)
+
+#with this you get an RMSE of ~29 without host, ~18 with host
+field.runs <- lm(Run.Diff ~ (FieldingPct.home + FieldingPct.visit + DPPerGame.home + DPPerGame.visit)*Host,
+                 data=Train.random)
+fit.field.runs <- predict(field.runs, newdata=Test.random)
+predict.field.runs <- Test.random %>%
+  select(Run.Diff, FieldingPct.home, FieldingPct.visit, DPPerGame.home, DPPerGame.visit, Host) %>%
+  mutate(field.predicted=fit.field.runs, field.residual=Run.Diff-field.predicted)
+mean(predict.field.runs$field.residual^2)
+
+field2.runs <- lm(Run.Diff ~ (FieldingPct.home + FieldingPct.visit)*Host, data=Train.random)
+fit.field2.runs <- predict(field2.runs, newdata=Test.random)
+predict.field2.runs <- Test.random %>% select(Run.Diff, FieldingPct.home, FieldingPct.visit, Host) %>%
+  mutate(field2.predicted=fit.field2.runs, field2.residual=Run.Diff-field2.predicted)
+mean(predict.field2.runs$field2.residual^2)
+
+##Logistic Regression
+attach(RegionalGames_Std)
+Home.Win <- as.factor(RegionalGames_Std[,"Home.Win"])
+is.factor(Home.Win)
+
+dim(RegionalGames_Std)
+set.seed(19)
+obs=seq(1,397,1)
+x=sample(obs,300,replace=F)
+Games <- data.frame(RegionalGames_Std)
+Games$Home.Win <- ifelse(Games$Home.Win=="Yes", 1,0)
+Games$Home.Win
+Games.train=Games[x,]
+Games.test=Games[-x,]
+
+#fielding percentage and double plays, misclass rate ~0.37
+logi.field <- glm(Home.Win ~ FieldingPct.home + FieldingPct.visit + DPPerGame.home + DPPerGame.visit, 
+                  family=binomial, data=Games.train)
+fit.logi.field <- logi.field %>% predict(Games.test, type="response")
+
+logi.field.predicted <- ifelse(fit.logi.field > 0.5, 1,0)
+
+counter.1=0
+for(i in 1:97)
+{
+  if(logi.field.predicted[i] != Games.test$Home.Win[i])
+  {counter.1=counter.1+1}
+}
+
+counter.1
+misclassification.rate=counte.1r/97
+misclassification.rate
 
 
+
+#Slugging Percentage misclass ~0.36
+
+logi.slg <- glm(Home.Win ~ SlgPct.home + SlgPct.visit, family=binomial,
+                data=Games.train)
+fit.logi.slg <- logi.slg %>% predict(Games.test, type="response")
+
+logi.slg.predicted <- ifelse(fit.logi.slg > 0.5,1,0)
+
+counter.2=0
+for(i in 1:97)
+{
+  if(logi.slg.predicted[i] != Games.test$Home.Win[i])
+  {counter.2=counter.2+1}
+}
+
+counter.2
+misclassification.rate=counter.2/97
+misclassification.rate
+
+#slg pct relative to host misclass ~0.27
+logi.slg2 <- glm(Home.Win ~ (SlgPct.home + SlgPct.visit)*Host, family=binomial,
+                data=Games.train)
+fit.logi.slg2 <- logi.slg2 %>% predict(Games.test, type="response")
+
+logi.slg2.predicted <- ifelse(fit.logi.slg2 > 0.5,1,0)
+
+counter.3=0
+for(i in 1:97)
+{
+  if(logi.slg2.predicted[i] != Games.test$Home.Win[i])
+  {counter.3=counter.3+1}
+}
+
+counter.3
+misclassification.rate=counter.3/97
+misclassification.rate
 
