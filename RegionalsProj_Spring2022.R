@@ -1,11 +1,11 @@
 #Read in the data
-Softball2015 <- read.csv("Softball2015.csv")
+Softball2015 <- read.csv("Data/Softball2015.csv")
 View(Softball2015)
-Softball2016 <- read.csv("Softball2016.csv")
+Softball2016 <- read.csv("Data/Softball2016.csv")
 View(Softball2016)
-Softball2017 <- read.csv("Softball2017.csv")
+Softball2017 <- read.csv("Data/Softball2017.csv")
 View(Softball2017)
-Softball2018 <- read.csv("Softball2018.csv")
+Softball2018 <- read.csv("Data/Softball2018.csv")
 View(Softball2018)
 
 #this is the google spreadsheet
@@ -13,9 +13,12 @@ Regionals <- read.csv("Data/NCAA Tournament Games 2015-2018 - Sheet1.csv")
 View(Regionals)
 
 library(tidyverse)
-library(ggplot2)
+#library(ggplot2)
 library(lattice)
 library(caret)
+
+#library(tidymodels)
+# send link to Tidymodels with R online book
 
 #filters each data set into teams that went to Regionals
 NCAA2015 <- filter(Softball2015, NCAA %in% c("At-large","Auto"))
@@ -216,7 +219,7 @@ fit.field.runs <- predict(field.runs, newdata=Test.random)
 predict.field.runs <- Test.random %>%
   select(Run.Diff, FieldingPct.home, FieldingPct.visit, DPPerGame.home, DPPerGame.visit, Host) %>%
   mutate(field.predicted=fit.field.runs, field.residual=Run.Diff-field.predicted)
-mean(predict.field.runs$field.residual^2)
+sqrt(mean(predict.field.runs$field.residual^2)) # RMSE
 
 field2.runs <- lm(Run.Diff ~ (FieldingPct.home + FieldingPct.visit)*Host, data=Train.random)
 fit.field2.runs <- predict(field2.runs, newdata=Test.random)
@@ -225,17 +228,19 @@ predict.field2.runs <- Test.random %>% select(Run.Diff, FieldingPct.home, Fieldi
 mean(predict.field2.runs$field2.residual^2)
 
 ##Logistic Regression
-attach(RegionalGames_Std)
+#attach(RegionalGames_Std)
 Home.Win <- as.factor(RegionalGames_Std[,"Home.Win"])
 is.factor(Home.Win)
 
+# Why did we redo the training/test split and call it something else? We don't remember
+# All of this seems to be doing the exact same thing as we did earlier!
 dim(RegionalGames_Std)
 set.seed(19)
 obs=seq(1,397,1)
 x=sample(obs,300,replace=F)
-Games <- data.frame(RegionalGames_Std)
-Games$Home.Win <- ifelse(Games$Home.Win=="Yes", 1,0)
-Games$Home.Win
+Games <- data.frame(RegionalGames_Std) # if RegionalGames_Std is not a data frame, we need to do this
+#Games$Home.Win <- ifelse(Games$Home.Win=="Yes", 1,0)
+Games$Home.Win <- as.factor(Games$Home.Win)
 Games.train=Games[x,]
 Games.test=Games[-x,]
 
@@ -244,7 +249,14 @@ logi.field <- glm(Home.Win ~ FieldingPct.home + FieldingPct.visit + DPPerGame.ho
                   family=binomial, data=Games.train)
 fit.logi.field <- logi.field %>% predict(Games.test, type="response")
 
-logi.field.predicted <- ifelse(fit.logi.field > 0.5, 1,0)
+
+logi.field.predicted <- ifelse(fit.logi.field > 0.5, "Yes","No")
+
+##### tidymodels example
+log_reg_model <- logistic_reg() %>% set_engine("glm") # Sets up the model we're going to use
+logreg1 <- fit(log_reg_model, formula = Home.Win ~ (FieldingPct.home + FieldingPct.visit)*Host, data = Games.train)
+logreg_predictions <- predict(logreg1, new_data = Games.test, type = "prob")
+head(logreg_predictions) # data frame with .pred_No and .pred_Yes columns
 
 counter.1=0
 for(i in 1:97)
@@ -257,15 +269,20 @@ counter.1
 misclassification.rate=counte.1r/97
 misclassification.rate
 
+# lines 261-270 in one line of code
+accuracy <- mean(logi.field.predicted == Games.test$Home.Win) # accuracy
+# == checks element-by-element to see if the two are equal
+# equal, TRUE = 1, not equal, FALSE = 0
+# mean adds up all the TRUEs and divides by the total number
 
+1 - accuracy # misclassification rate
 
 #Slugging Percentage misclass ~0.36
-
 logi.slg <- glm(Home.Win ~ SlgPct.home + SlgPct.visit, family=binomial,
                 data=Games.train)
 fit.logi.slg <- logi.slg %>% predict(Games.test, type="response")
 
-logi.slg.predicted <- ifelse(fit.logi.slg > 0.5,1,0)
+logi.slg.predicted <- ifelse(fit.logi.slg > 0.5, "Yes", "No")
 
 counter.2=0
 for(i in 1:97)
