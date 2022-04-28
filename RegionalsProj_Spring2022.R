@@ -319,57 +319,63 @@ counter.3
 misclassification.rate=counter.3/97
 misclassification.rate
 
+
+
 ######tidymodels stuff
 library(tidymodels)
 library(parsnip)
 tidymodels_prefer()
 
+#this is the tidymodels version, but creates a tibble. How to change to numerical?
 Games_split <- initial_split(RegionalGames_Std, prop = 0.75)
 Games_train <- training(Games_split)
 Games_test <- testing(Games_split)
 Games_test_small <- Games_test %>% slice_sample(n=10)
 
+#using previous split instead done in lines 247-249
+#MSE: ~24.23
 lm_model1 <- linear_reg() %>% set_engine("lm")
 lm_model1_fit <- lm_model1 %>%
   fit(Run.Diff ~ RunsAllowed.home + RunsAllowed.visit + PO.home + PO.visit + 
-        SlgPct.home + SlgPct.visit, data = Games_train)
+        SlgPct.home + SlgPct.visit, data = Games.train)
 model1_results <- lm_model1_fit %>% extract_fit_engine() %>% summary()
 model1_results
-model1_pred <- predict(lm_model1_fit, new_data = Games_test_small)
-compare1 <- Games_test_small %>% select(
+model1_pred <- predict(lm_model1_fit, new_data = Games.test)
+compare1 <- Games.test %>% select(
   Run.Diff, RunsAllowed.home, RunsAllowed.visit, PO.home, PO.visit, 
   SlgPct.home, SlgPct.visit)%>%
-  mutate(model = model1_pred, resid <- Run.Diff-model)
+  mutate(model = model1_pred, resid = Run.Diff-model)
+mean(as.numeric(unlist(compare1$resid^2))) #why do I need to do this now?
 
 
+#MSE: ~26.78
 lm_model2 <- linear_reg() %>% set_engine("lm")
 lm_model2_fit <- lm_model2 %>%
-  fit(Run.Diff ~ RunsAllowed.home + PO.home + SlgPct.home, data = Games_train)
+  fit(Run.Diff ~ RunsAllowed.home + PO.home + SlgPct.home, data = Games.train)
 model2_results <- lm_model2_fit %>% extract_fit_engine() %>% summary()
 model2_results
-model2_pred <- predict(lm_model2_fit, new_data = Games_test_small)
-compare2 <- Games_test_small %>% select(
+model2_pred <- predict(lm_model2_fit, new_data = Games.test)
+compare2 <- Games.test %>% select(
   Run.Diff, RunsAllowed.home, PO.home, 
   SlgPct.home)%>%
-  mutate(model = model2_pred, resid <- Run.Diff-model)
+  mutate(model = model2_pred, resid = Run.Diff-model)
+mean(as.numeric(unlist(compare2$resid^2)))
 
+#MSE: ~18.24
 lm_model3 <- linear_reg() %>% set_engine("lm")
 lm_model3_fit <- lm_model3 %>%
   fit(Run.Diff ~ (RunsAllowed.home + RunsAllowed.visit + PO.home + PO.visit + 
-                    SlgPct.home + SlgPct.visit)*Host, data = Games_train)
+                    SlgPct.home + SlgPct.visit)*Host, data = Games.train)
 model3_results <- lm_model3_fit %>% extract_fit_engine() %>% summary()
 model3_results
-model3_pred <- predict(lm_model3_fit, new_data = Games_test_small)
-compare3 <- Games_test_small %>% select(
+model3_pred <- predict(lm_model3_fit, new_data = Games.test)
+compare3 <- Games.test %>% select(
   Run.Diff, RunsAllowed.home, PO.home, 
   SlgPct.home, Host)%>%
-  mutate(model = model3_pred, resid <- Run.Diff-model)
+  mutate(model = model3_pred, resid = Run.Diff-model)
+mean(as.numeric(unlist(compare3$resid^2)))
 
-glm.model1 <- glm(Home.Win ~ RunsAllowed.home + RunsAllowed.visit + 
-                    PO.home + PO.visit + 
-                    SlgPct.home + SlgPct.visit, 
-                  data=Games_train, family = binomial
-)
+##Logistic Regression
 
 log_reg_model1 <- logistic_reg() %>% set_engine("glm")
 logreg1 <- fit(log_reg_model1, formula = Home.Win ~ RunsAllowed.home + RunsAllowed.visit + 
@@ -379,12 +385,103 @@ logreg1 <- fit(log_reg_model1, formula = Home.Win ~ RunsAllowed.home + RunsAllow
 logreg_predictions <- predict(logreg1, new_data = Games_test_small, type = "prob")
 head(logreg_predictions)
 
-RegionalGames_Std <- subset(RegionalGames_Std, select=-c(BatterBB.home, BatterBB.visit, 
-                                                         BatterHBP.home, BatterHBP.visit, 
-                                                         SacFlies.home, SacFlies.visit, 
-                                                         SacBunts.home, SacBunts.visit, PitcherHBP.home, 
-                                                         PitcherHBP.visit))
-categorical <- c(1:5, 29:33, 75:77, 61:65, 73:75)
-correlation_table <- cor(RegionalGames_Std[,-categorical])
-View(correlation_table)
+logi_vector <- ifelse(logreg_predictions$.pred_Yes > 0.5, "Yes", "No")
+accuracy_model1 <- mean(logi_vector == Games_test_small$Home.Win)
 
+#accuracy ~ 0.74
+logreg_predictions_v2 <- predict(logreg1, new_data = Games.test, type = "prob")
+logi_vector_v2 <- ifelse(logreg_predictions_v2$.pred_Yes > 0.5, "Yes", "No")
+accuracy_model1_v2 <- mean(logi_vector_v2 == Games.test$Home.Win)
+table(logi_vector_v2, Games.test$Home.Win) #textbook
+
+#accuracy ~ 0.77
+log_reg_model2 <- logistic_reg() %>% set_engine("glm")
+logreg2 <- fit(log_reg_model2, formula = Home.Win ~ (RunsAllowed.home + RunsAllowed.visit +
+                                                       PO.home + PO.visit +
+                                                       SlgPct.home + SlgPct.visit)*Host, data=Games.train)
+logreg_predictions2 <- predict(logreg2, new_data = Games.test, type = "prob")
+
+logi_vector2 <- ifelse(logreg_predictions2$.pred_Yes > 0.5, "Yes", "No")
+accuracy_model2 <- mean(logi_vector2 == Games.test$Home.Win)
+accuracy_model2
+
+#accuracy ~ 0.71 (w/o host ~ 0.69)
+log_reg_model3 <- logistic_reg() %>% set_engine("glm")
+logreg3 <- fit(log_reg_model3, formula = Home.Win ~ (RunsAllowed.home + RunsAllowed.visit + 
+                 PO.home + PO.visit + 
+                 ERA.home + ERA.visit)*Host, 
+               data=Games.train)
+logreg_predictions3 <- predict(logreg3, new_data = Games.test, type = "prob")
+logi_vector3 <- ifelse(logreg_predictions3$.pred_Yes > 0.5, "Yes", "No")
+accuracy_model3 <- mean(logi_vector3 == Games.test$Home.Win)
+accuracy_model3
+
+log_reg_model4 <-logistic_reg() %>% set_engine("glm")
+logreg4 <- fit(log_reg_model4, formula = Home.Win ~ (SlgPct.home + SlgPct.visit + 
+                 PO.home + PO.visit + 
+                 ERA.home + ERA.visit +
+                 DPPerGame.home + DPPerGame.visit)*Host, 
+               data=Games.train)
+logreg_predictions4 <- predict(logreg4, new_data = Games.test, type = "prob")
+logi_vector4 <- ifelse(logreg_predictions4$.pred_Yes > 0.5, "Yes", "No")
+accuracy_model4 <- mean(logi_vector4 == Games.test$Home.Win)
+accuracy_model4
+
+log_reg_model5 <- logistic_reg() %>% set_engine("glm")
+
+log_reg_model2 <- logistic_reg() %>% set_engine("glm")
+logreg2 <- fit(log_reg_model2, formula = Home.Win ~ (I(RunsAllowed.home - RunsAllowed.visit) +
+                                                       I(A.home - A.visit) +
+                                                       I(SlgPct.home - SlgPct.visit))*Host, data=Games.train)
+logreg_predictions2 <- predict(logreg2, new_data = Games.test, type = "prob")
+
+logi_vector2 <- ifelse(logreg_predictions2$.pred_Yes > 0.5, "Yes", "No")
+accuracy_model2 <- mean(logi_vector2 == Games.test$Home.Win)
+accuracy_model2
+
+plot(RunsScored.home ~ PO.home, data=RegionalGames_Std)
+table(RegionalGames_Std$Host, RegionalGames_Std$Home.Win)
+
+
+
+
+
+
+##attempting other methods
+
+#LDA 
+
+library(MASS)
+
+#allows for assumption of same variance in predictors
+scaled_train <- scale(select(Games.train, RunsAllowed.home, RunsAllowed.visit, 
+                             PO.home, PO.visit, SlgPct.home, SlgPct.visit))
+
+lda.fit <- lda(Home.Win ~ RunsAllowed.home + RunsAllowed.visit + PO.home + PO.visit +
+                 SlgPct.home + SlgPct.visit, data = scaled.train)
+lda.fit
+#~40% of the time, home team did not win (comes from training set)
+#shows average for each predictor in each category
+
+lda_predict <- predict(lda.fit, Games.test)
+mean(lda_predict$class == Games.test$Home.Win)
+
+#naive Bayes
+library(e1071)
+nb.model <- naive_Bayes() %>% set_engine("klaR")
+nb.fit <- fit(nb.model, formula = Home.Win ~ RunsAllowed.home + RunsAllowed.visit + 
+                                       PO.home + PO.visit + 
+                                       ERA.home + ERA.visit,
+              data = Games.train)
+nb.predict <- predict(nb.fit, Games.test)
+
+#Knn
+knn_spec <- nearest_neighbor %>% 
+  set_engine("kknn") %>% 
+  set_mode("classification")
+knn_fit <- knn_spec %>%
+  fit(Home.Win ~ (RunsAllowed.home + RunsAllowed.visit + 
+                             PO.home + PO.visit + 
+                             ERA.home + ERA.visit)*Host, data = Games_train)
+
+#look at 2018 arizona regional and verify that mississippi valley state was a home team in mult games
