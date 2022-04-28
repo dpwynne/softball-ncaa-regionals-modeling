@@ -17,7 +17,7 @@ library(tidyverse)
 library(lattice)
 library(caret)
 
-#library(tidymodels)
+library(tidymodels)
 # send link to Tidymodels with R online book
 
 #filters each data set into teams that went to Regionals
@@ -43,11 +43,15 @@ RegionalStats <- RegionalStats[, c(32,1:31)]
 
 #Adds stats: fielding percentage, singles, total bases, double plays per game, slugging percentage, success rate of stolen bases
 #second line adds batting average
-RegionalStats <- mutate(RegionalStats, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, SlgPct = TB/AB, SuccessRate = SB/(SB+CS))
+RegionalStats <- mutate(RegionalStats, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, 
+                        TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
+                        SlgPct = TB/AB, SuccessRate = SB/(SB+CS))
 RegionalStats <- mutate(RegionalStats, BA=H/AB)
 
 #Joins Regionals and stats into one data frame by game
-RegionalGames <- Regionals %>% left_join(RegionalStats, by = c("Home.Team" = "Name", "Year"),  suffix = c(".x", ".home")) %>% left_join(RegionalStats, by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
+RegionalGames <- Regionals %>% left_join(RegionalStats, by = c("Home.Team" = "Name", "Year"),  
+                                         suffix = c(".x", ".home")) %>% left_join(RegionalStats, 
+                                        by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
 
 #Adds column indicating home team win
 RegionalGames <- mutate(RegionalGames, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
@@ -253,6 +257,8 @@ fit.logi.field <- logi.field %>% predict(Games.test, type="response")
 logi.field.predicted <- ifelse(fit.logi.field > 0.5, "Yes","No")
 
 ##### tidymodels example
+library(tidymodels)
+library(parsnip)
 log_reg_model <- logistic_reg() %>% set_engine("glm") # Sets up the model we're going to use
 logreg1 <- fit(log_reg_model, formula = Home.Win ~ (FieldingPct.home + FieldingPct.visit)*Host, data = Games.train)
 logreg_predictions <- predict(logreg1, new_data = Games.test, type = "prob")
@@ -312,4 +318,73 @@ for(i in 1:97)
 counter.3
 misclassification.rate=counter.3/97
 misclassification.rate
+
+######tidymodels stuff
+library(tidymodels)
+library(parsnip)
+tidymodels_prefer()
+
+Games_split <- initial_split(RegionalGames_Std, prop = 0.75)
+Games_train <- training(Games_split)
+Games_test <- testing(Games_split)
+Games_test_small <- Games_test %>% slice_sample(n=10)
+
+lm_model1 <- linear_reg() %>% set_engine("lm")
+lm_model1_fit <- lm_model1 %>%
+  fit(Run.Diff ~ RunsAllowed.home + RunsAllowed.visit + PO.home + PO.visit + 
+        SlgPct.home + SlgPct.visit, data = Games_train)
+model1_results <- lm_model1_fit %>% extract_fit_engine() %>% summary()
+model1_results
+model1_pred <- predict(lm_model1_fit, new_data = Games_test_small)
+compare1 <- Games_test_small %>% select(
+  Run.Diff, RunsAllowed.home, RunsAllowed.visit, PO.home, PO.visit, 
+  SlgPct.home, SlgPct.visit)%>%
+  mutate(model = model1_pred, resid <- Run.Diff-model)
+
+
+lm_model2 <- linear_reg() %>% set_engine("lm")
+lm_model2_fit <- lm_model2 %>%
+  fit(Run.Diff ~ RunsAllowed.home + PO.home + SlgPct.home, data = Games_train)
+model2_results <- lm_model2_fit %>% extract_fit_engine() %>% summary()
+model2_results
+model2_pred <- predict(lm_model2_fit, new_data = Games_test_small)
+compare2 <- Games_test_small %>% select(
+  Run.Diff, RunsAllowed.home, PO.home, 
+  SlgPct.home)%>%
+  mutate(model = model2_pred, resid <- Run.Diff-model)
+
+lm_model3 <- linear_reg() %>% set_engine("lm")
+lm_model3_fit <- lm_model3 %>%
+  fit(Run.Diff ~ (RunsAllowed.home + RunsAllowed.visit + PO.home + PO.visit + 
+                    SlgPct.home + SlgPct.visit)*Host, data = Games_train)
+model3_results <- lm_model3_fit %>% extract_fit_engine() %>% summary()
+model3_results
+model3_pred <- predict(lm_model3_fit, new_data = Games_test_small)
+compare3 <- Games_test_small %>% select(
+  Run.Diff, RunsAllowed.home, PO.home, 
+  SlgPct.home, Host)%>%
+  mutate(model = model3_pred, resid <- Run.Diff-model)
+
+glm.model1 <- glm(Home.Win ~ RunsAllowed.home + RunsAllowed.visit + 
+                    PO.home + PO.visit + 
+                    SlgPct.home + SlgPct.visit, 
+                  data=Games_train, family = binomial
+)
+
+log_reg_model1 <- logistic_reg() %>% set_engine("glm")
+logreg1 <- fit(log_reg_model1, formula = Home.Win ~ RunsAllowed.home + RunsAllowed.visit + 
+                 PO.home + PO.visit + 
+                 SlgPct.home + SlgPct.visit, 
+               data=Games_train)
+logreg_predictions <- predict(logreg1, new_data = Games_test_small, type = "prob")
+head(logreg_predictions)
+
+RegionalGames_Std <- subset(RegionalGames_Std, select=-c(BatterBB.home, BatterBB.visit, 
+                                                         BatterHBP.home, BatterHBP.visit, 
+                                                         SacFlies.home, SacFlies.visit, 
+                                                         SacBunts.home, SacBunts.visit, PitcherHBP.home, 
+                                                         PitcherHBP.visit))
+categorical <- c(1:5, 29:33, 75:77, 61:65, 73:75)
+correlation_table <- cor(RegionalGames_Std[,-categorical])
+View(correlation_table)
 
