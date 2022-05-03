@@ -9,7 +9,7 @@ Softball2018 <- read.csv("Data/Softball2018.csv")
 View(Softball2018)
 
 #this is the google spreadsheet
-Regionals <- read.csv("Data/NCAA Tournament Games 2015-2018 - Sheet1.csv")
+Regionals <- read.csv("Data/NCAA Tournament Games 2015-2018 - Sheet1 new.csv")
 View(Regionals)
 
 library(tidyverse)
@@ -244,9 +244,9 @@ obs=seq(1,397,1)
 x=sample(obs,300,replace=F)
 Games <- data.frame(RegionalGames_Std) # if RegionalGames_Std is not a data frame, we need to do this
 #Games$Home.Win <- ifelse(Games$Home.Win=="Yes", 1,0)
-Games$Home.Win <- as.factor(Games$Home.Win)
-Games.train=Games[x,]
-Games.test=Games[-x,]
+RegionalGames_Std$Home.Win <- as.factor(RegionalGames_Std$Home.Win)
+Games.train=RegionalGames_Std[x,]
+Games.test=RegionalGames_Std[-x,]
 
 #fielding percentage and double plays, misclass rate ~0.37
 logi.field <- glm(Home.Win ~ FieldingPct.home + FieldingPct.visit + DPPerGame.home + DPPerGame.visit, 
@@ -447,41 +447,59 @@ table(RegionalGames_Std$Host, RegionalGames_Std$Home.Win)
 
 
 
-##attempting other methods
 
-#LDA 
 
-library(MASS)
+#2018 arizona - mississippi valley was supposed to be mississippi state
 
-#allows for assumption of same variance in predictors
-scaled_train <- scale(select(Games.train, RunsAllowed.home, RunsAllowed.visit, 
-                             PO.home, PO.visit, SlgPct.home, SlgPct.visit))
+#THIS model has highest accuracy ~0.78
+log_reg_model.best <- logistic_reg() %>% set_engine("glm")
+logreg.best <- fit(log_reg_model.best, formula = Home.Win ~ (I(RunsAllowed.home - RunsAllowed.visit) +
+                                                       I(PO.home - PO.visit) +
+                                                       I(SlgPct.home - SlgPct.visit))*Host, data=Games.train)
+logreg_predictions.best <- predict(logreg.best, new_data = Games.test, type = "prob")
 
-lda.fit <- lda(Home.Win ~ RunsAllowed.home + RunsAllowed.visit + PO.home + PO.visit +
-                 SlgPct.home + SlgPct.visit, data = scaled.train)
-lda.fit
-#~40% of the time, home team did not win (comes from training set)
-#shows average for each predictor in each category
+logi_vector.best <- ifelse(logreg_predictions.best$.pred_Yes > 0.5, "Yes", "No")
+accuracy_model.best <- mean(logi_vector.best == Games.test$Home.Win)
+accuracy_model.best
 
-lda_predict <- predict(lda.fit, Games.test)
-mean(lda_predict$class == Games.test$Home.Win)
+plot(RunsScored.home ~ PO.home, data=RegionalGames_Std)
+table(RegionalGames_Std$Host, RegionalGames_Std$Home.Win)
 
-#naive Bayes
-library(e1071)
-nb.model <- naive_Bayes() %>% set_engine("klaR")
-nb.fit <- fit(nb.model, formula = Home.Win ~ RunsAllowed.home + RunsAllowed.visit + 
-                                       PO.home + PO.visit + 
-                                       ERA.home + ERA.visit,
-              data = Games.train)
-nb.predict <- predict(nb.fit, Games.test)
+RegionalGames_Std <- mutate(RegionalGames_Std, 
+                            Runs.home = RunsScored.home - RunsAllowed.home, 
+                            Runs.visit = RunsScored.visit - RunsAllowed.visit,
+                            IP_Real.home = (IP.home %/% 1) + 1/3*(IP.home %% 1),
+                            IP_Real.visit = (IP.visit %/% 1) + 1/3*(IP.visit %% 1))
 
-#Knn
-knn_spec <- nearest_neighbor %>% 
-  set_engine("kknn") %>% 
-  set_mode("classification")
-knn_fit <- knn_spec %>%
-  fit(Home.Win ~ (RunsAllowed.home + RunsAllowed.visit + 
-                             PO.home + PO.visit + 
-                             ERA.home + ERA.visit)*Host, data = Games_train)
+RegionalGames_Std$Home.Win <- as.factor(RegionalGames_Std$Home.Win)
 
-#look at 2018 arizona regional and verify that mississippi valley state was a home team in mult games
+Games.train=RegionalGames_Std[x,]
+Games.test=RegionalGames_Std[-x,]
+
+#~0.75
+log_reg_model6 <- logistic_reg() %>% set_engine("glm")
+logreg6 <- fit(log_reg_model6, formula = Home.Win ~ (
+                                                       I(FieldingPct.home - FieldingPct.visit) + 
+                                                       I(RunsAllowed.home - RunsAllowed.visit) +
+                                                       I(PO.home - PO.visit) +
+                                                       I(SlgPct.home - SlgPct.visit))*Host, data=Games.train)
+logreg_predictions6 <- predict(logreg6, new_data = Games.test, type = "prob")
+
+logi_vector6 <- ifelse(logreg_predictions6$.pred_Yes > 0.5, "Yes", "No")
+accuracy_model6 <- mean(logi_vector6 == Games.test$Home.Win)
+accuracy_model6
+
+#accuracy ~ 0.72
+log_reg_model2 <- logistic_reg() %>% set_engine("glm")
+logreg2 <- fit(log_reg_model2, formula = Home.Win ~ (I(FieldingPct.home - FieldingPct.visit) +
+                                                       I(RunsAllowed.home - RunsAllowed.visit) +
+                                                       I(IP_Real.home - IP_Real.visit) +
+                                                       I(SlgPct.home - SlgPct.visit))*Host, data=Games.train)
+logreg_predictions2 <- predict(logreg2, new_data = Games.test, type = "prob")
+
+logi_vector2 <- ifelse(logreg_predictions2$.pred_Yes > 0.5, "Yes", "No")
+accuracy_model2 <- mean(logi_vector2 == Games.test$Home.Win)
+accuracy_model2
+
+
+
