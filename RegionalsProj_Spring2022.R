@@ -336,17 +336,17 @@ Games_test_small <- Games_test %>% slice_sample(n=10)
 #MSE: ~24.23
 lm_model1 <- linear_reg() %>% set_engine("lm")
 lm_model1_fit <- lm_model1 %>%
-  fit(Run.Diff ~ RunsAllowed.home + RunsAllowed.visit + PO.home + PO.visit + 
-        SlgPct.home + SlgPct.visit, data = Games.train)
+  fit(Run.Diff ~ HR*Host, data = diff.train)
 model1_results <- lm_model1_fit %>% extract_fit_engine() %>% summary()
 model1_results
-model1_pred <- predict(lm_model1_fit, new_data = Games.test)
-compare1 <- Games.test %>% select(
-  Run.Diff, RunsAllowed.home, RunsAllowed.visit, PO.home, PO.visit, 
-  SlgPct.home, SlgPct.visit)%>%
+model1_pred <- predict(lm_model1_fit, new_data = diff.test)
+compare1 <- diff.test %>% select(
+  Run.Diff, HR)%>%
   mutate(model = model1_pred, resid = Run.Diff-model)
 mean(as.numeric(unlist(compare1$resid^2))) #why do I need to do this now?
 
+ggplot(data = Differences, mapping = aes(x = HR, y = Run.Diff, color = as.factor(Host))) +
+  geom_point()
 
 #MSE: ~26.78
 lm_model2 <- linear_reg() %>% set_engine("lm")
@@ -539,8 +539,7 @@ Differences <- mutate(RegionalGames_Std, Doubles = Doubles.home - Doubles.visit,
                       SlgPct = SlgPct.home - SlgPct.visit,
                       SuccessRate = SuccessRate.home - SuccessRate.visit,
                       BA = BA.home - BA.visit)
-keep <- c("Doubles", "Triples","HR", "RunsScored", "SB", "CS", "IP", "RunsAllowed", "ER", "ERA", "PO", 
-          "A", "E", "DP", "FieldingPct", "Singles", "TB", "SlgPct", "SuccessRate", "BA", "Run.Diff", "Host")
+keep <- c("HR", "RunsScored", "SB", "CS", "RunsAllowed", "ER", "ERA", "E", "DP", "FieldingPct", "Singles", "TB", "Doubles", "Triples", "SuccessRate", "BA", "Run.Diff", "Home.Win", "Host")
 Differences <- Differences[keep]
 
 library(ggplot2)
@@ -548,30 +547,35 @@ library(parsnip)
 library(tune)
 library(dials)
 library(yardstick)
-
-diff.ridge <- linear_reg(penalty = tune(), mixture = 0) %>% set_engine("glmnet")
-
 library(readr)
 library(rsample)
+library(recipes)
+library(workflows)
 
+Differences$Home.Win <- as.factor(Differences$Home.Win)
+
+diff.ridge <- logistic_reg(penalty = tune(), mixture = 0) %>% set_engine("glmnet")
+
+
+set.seed(1)
 Diff.split <- initial_split(Differences)
 diff.train <- analysis(Diff.split)
 diff.test <- assessment(Diff.split)
 
-library(recipes)
-diff.recipe <- recipe(Run.Diff ~ ., data = Differences) %>%
-  step_dummy(all_nominal()) %>%
+
+diff.recipe <- recipe(Home.Win ~ ., data = Differences) %>% step_rm("Run.Diff") %>%
+ # step_dummy(all_nominal()) %>%
   step_center(all_predictors()) %>%
   step_scale(all_predictors())
 
-library(workflows)
+
 diff.wf <- workflow() %>%
   add_recipe(diff.recipe) %>%
   add_model(diff.ridge)
 
 diff.wf
 
-lambda_grid <- grid_regular(penalty(range = c(-1,1)), levels = 50)
+lambda_grid <- grid_regular(penalty(range = c(-2,-0.5)), levels = 50)
 
 diff.training.folds <- vfold_cv(diff.train)
 diff.ridge.lambda <- tune_grid(
@@ -582,37 +586,43 @@ diff.ridge.lambda <- tune_grid(
 
 diff.ridge.lambda %>% collect_metrics()
 
-#when I did this initially, it gave a nike checkmark. Now there is no true min, should we expand the penalty range?
 diff.ridge.lambda %>%
   collect_metrics() %>%
-  filter(.metric == "rmse") %>%
+  filter(.metric == "accuracy") %>%
   ggplot(aes(x = penalty, y = mean)) +
   geom_point() +
   geom_line(color = "red") + 
-  labs(x = "penalty", y = "RMSE", 
+  labs(x = "penalty", y = "Accuracy", 
        title = "Tuning Grid for Ridge Regression")
 
-diff.ridge.final <- diff.ridge.lambda %>% select_best(lambda_grid, metric = "rmse")
+diff.ridge.final <- diff.ridge.lambda %>% select_best(lambda_grid, metric = "accuracy")
 
 ridge.wflow.final <- finalize_workflow(diff.wf, parameters = diff.ridge.final)
 
 ridge.wflow.fit <- fit(ridge.wflow.final, data = diff.train)
-
+View(tidy(ridge.wflow.fit))
 ridge.wflow.fit
 
 diff.ridge.preds <- predict(ridge.wflow.fit, new_data = diff.test) %>%
-  bind_cols(diff.test)
+  bind_cols(diff.test) %>%
+  mutate(Home.Win = as.factor(Home.Win))
 
-rmse(diff.ridge.preds, truth = `Run.Diff`, estimate = `.pred`)
+conf_mat(diff.ridge.preds, truth = `Home.Win`, estimate = `.pred_class`) %>% summary()
 
 ## Lasso
 
-diff.lasso <- linear_reg(penalty = tune(), mixture = 1) %>% set_engine("glmnet")
+diff.lasso <- logistic_reg(penalty = tune(), mixture = 1) %>% set_engine("glmnet")
 
-lambda_grid <- grid_regular(penalty(), levels = 50)
+#lambda_grid <- grid_regular(penalty(), levels = 50)
+
+diff.recipe2 <- recipe(Home.Win ~ ., data = Differences) %>% step_rm("Run.Diff") %>%
+ # step_dummy(all_nominal()) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors())
+
 
 diff.wf2 <- workflow() %>%
-  add_recipe(diff.recipe) %>%
+  add_recipe(diff.recipe2) %>%
   add_model(diff.lasso)
 
 #"a correlation computation is required, but estimate is constant and has 0 standard dev..."
@@ -624,40 +634,41 @@ lasso.lambda <- tune_grid(
 
 lasso.lambda %>%
   collect_metrics() %>%
-  filter(.metric == "rmse") %>%
+  filter(.metric == "accuracy") %>%
   ggplot(aes(x = penalty, y = mean)) + 
   geom_point() +
   geom_line(color = "red") +
-  labs(x = "penalty", y = "RMSE",
+  labs(x = "penalty", y = "Accuracy",
        title = "Tuning Grid for LASSO")
 
-lambda_grid <- grid_regular(penalty(range = c(log10(0.25), log10(0.5))), levels = 50)
+#lambda_grid <- grid_regular(penalty(range = c(log10(0.25), log10(0.5))), levels = 50)
 
-lasso.lambda <- tune_grid(
-  diff.wf2, 
-  resamples = diff.training.folds,
-  grid = lambda_grid
-)
+# lasso.lambda <- tune_grid(
+#   diff.wf2, 
+#   resamples = diff.training.folds,
+#   grid = lambda_grid
+# )
+# 
+# lasso.lambda %>%
+#   collect_metrics() %>%
+#   filter(.metric == "rmse") %>%
+#   ggplot(aes(x = penalty, y = mean)) + 
+#   geom_point() +
+#   geom_line(color = "red") + 
+#   labs(x = "penalty", y = "RMSE",
+#        title = "Tuning Grid for LASSO")
 
-lasso.lambda %>%
-  collect_metrics() %>%
-  filter(.metric == "rmse") %>%
-  ggplot(aes(x = penalty, y = mean)) + 
-  geom_point() +
-  geom_line(color = "red") + 
-  labs(x = "penalty", y = "RMSE",
-       title = "Tuning Grid for LASSO")
-
-lasso.final <- lasso_lambda %>% select_best(lambda_grid, metric = "rmse")
+lasso.final <- lasso.lambda %>% select_best(lambda_grid, metric = "accuracy")
 
 lasso.wflow.final <- finalize_workflow(diff.wf2, lasso.final)
 
 lasso.wflow.fit <- lasso.wflow.final %>% fit(data = diff.train)
+View(tidy(lasso.wflow.fit))
 
 lasso.predictions <- predict(lasso.wflow.fit, new_data = diff.test) %>%
   bind_cols(diff.test)
 
-rmse(lasso.predictions, truth = `Run.Diff`, estimate = `.pred`)
+conf_mat(lasso.predictions, truth = `Home.Win`, estimate = `.pred_class`) %>% summary()
 
 
 
