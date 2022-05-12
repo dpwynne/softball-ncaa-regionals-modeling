@@ -698,3 +698,22 @@ lasso.diff <- glmnet(pred.matrix[x, ], response.vector[x], alpha = 1,
                     lambda = grid)
 
 plot(lasso.diff)
+
+test <- glm(Home.Win ~ Host*(E + SlgPct + HR + ERA + Doubles), family = binomial, data = diff.train) %>% MASS::stepAIC()
+
+fit.logi.slg <- test %>% predict(diff.test, type="response")
+
+logi.slg.predicted <- ifelse(fit.logi.slg > 0.5, "Yes", "No")
+
+counter.2=0
+for(i in 1:100)
+{
+  if(logi.slg.predicted[i] !=diff.test$Home.Win[i])
+  {counter.2=counter.2+1}
+}
+
+counter.2
+misclassification.rate=counter.2/100
+misclassification.rate
+
+#try glm with stepAIC predictors that aren't colinear
