@@ -451,18 +451,6 @@ table(RegionalGames_Std$Host, RegionalGames_Std$Home.Win)
 
 #2018 arizona - mississippi valley was supposed to be mississippi state
 
-#THIS model has highest accuracy ~0.78
-log_reg_model.best <- logistic_reg() %>% set_engine("glm")
-logreg.best <- fit(log_reg_model.best, formula = Home.Win ~ (I(RunsAllowed.home - RunsAllowed.visit) +
-                                                       I(PO.home - PO.visit) +
-                                                       I(SlgPct.home - SlgPct.visit))*Host, data=Games.train)
-logreg_predictions.best <- predict(logreg.best, new_data = Games.test, type = "prob")
-
-logi_vector.best <- ifelse(logreg_predictions.best$.pred_Yes > 0.5, "Yes", "No")
-accuracy_model.best <- mean(logi_vector.best == Games.test$Home.Win)
-accuracy_model.best
-
-plot(RunsScored.home ~ PO.home, data=RegionalGames_Std)
 table(RegionalGames_Std$Host, RegionalGames_Std$Home.Win)
 
 RegionalGames_Std <- mutate(RegionalGames_Std, 
@@ -501,5 +489,149 @@ logi_vector2 <- ifelse(logreg_predictions2$.pred_Yes > 0.5, "Yes", "No")
 accuracy_model2 <- mean(logi_vector2 == Games.test$Home.Win)
 accuracy_model2
 
+##THIS model has highest accuracy ~0.78
+log_reg_model.best <- logistic_reg() %>% set_engine("glm")
+logreg.best <- fit(log_reg_model.best, formula = Home.Win ~ (I(RunsAllowed.home - RunsAllowed.visit) +
+                                                               I(PO.home - PO.visit) +
+                                                               I(SlgPct.home - SlgPct.visit))*Host, data=Games.train)
+logreg_predictions.best <- predict(logreg.best, new_data = Games.test, type = "prob")
+
+logi_vector.best <- ifelse(logreg_predictions.best$.pred_Yes > 0.5, "Yes", "No")
+accuracy_model.best <- mean(logi_vector.best == Games.test$Home.Win)
+accuracy_model.best
+summary(logreg_predictions.best)
+
+summary(logreg.best$fit)
+
+plot(RunsScored.home ~ PO.home, data=RegionalGames_Std)
+plot(SlgPct.home ~ RunsAllowed.home, data = RegionalGames_Std)
+plot(SlgPct.home ~ PO.home, data = RegionalGames_Std)
+
+boxplot(PO.home ~ Home.Win, data = RegionalGames_Std)
+boxplot(PO.visit ~ Home.Win, data = RegionalGames_Std)
 
 
+regfit.full <- regsubsets(Home.Win ~ , RegionalGames_Std)
+
+log_reg_model.best <- logistic_reg(penalty = 1) %>% set_engine("glmnet")
+logreg.best <- fit(log_reg_model.best, formula = Home.Win ~ (I(RunsAllowed.home - RunsAllowed.visit) +
+                                                               I(PO.home - PO.visit) +
+                                                               I(SlgPct.home - SlgPct.visit))*Host, data=Games.train)
+logreg_predictions.best <- predict(logreg.best, new_data = Games.test, type = "prob")
+
+Differences <- mutate(RegionalGames_Std, Doubles = Doubles.home - Doubles.visit, 
+                      Triples = Triples.home - Triples.visit,
+                      HR = HR.home - HR.visit, 
+                      RunsScored = RunsScored.home - RunsScored.visit,
+                      SB = SB.home - SB.visit, 
+                      CS = CS.home - CS.visit, 
+                      IP = IP.home - IP.visit, 
+                      RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                      ER = ER.home - ER.visit,
+                      ERA = ERA.home - ERA.visit,
+                      PO = PO.home - PO.visit,
+                      A = A.home - A.visit,
+                      E = E.home - E.visit,
+                      DP = DPPerGame.home - DPPerGame.visit,
+                      FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                      Singles = Singles.home - Singles.visit,
+                      TB = TB.home - TB.visit, 
+                      SlgPct = SlgPct.home - SlgPct.visit,
+                      SuccessRate = SuccessRate.home - SuccessRate.visit,
+                      BA = BA.home - BA.visit)
+keep <- c("Doubles", "Triples","HR", "RunsScored", "SB", "CS", "IP", "RunsAllowed", "ER", "ERA", "PO", 
+          "A", "E", "DP", "FieldingPct", "Singles", "TB", "SlgPct", "SuccessRate", "BA", "Run.Diff", "Host")
+Differences <- Differences[keep]
+
+library(ggplot2)
+library(parsnip)
+library(tune)
+library(dials)
+library(yardstick)
+
+diff.ridge <- linear_reg(penalty = tune(), mixture = 0) %>% set_engine("glmnet")
+
+library(readr)
+library(rsample)
+
+Diff.split <- initial_split(Differences)
+diff.train <- analysis(Diff.split)
+diff.test <- assessment(Diff.split)
+
+library(recipes)
+diff.recipe <- recipe(Run.Diff ~ ., data = Differences) %>%
+  step_dummy(all_nominal()) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors())
+
+library(workflows)
+diff.wf <- workflow() %>%
+  add_recipe(diff.recipe) %>%
+  add_model(diff.ridge)
+
+diff.wf
+
+lambda_grid <- grid_regular(penalty(range = c(-1,1)), levels = 50)
+
+diff.training.folds <- vfold_cv(diff.train)
+diff.ridge.lambda <- tune_grid(
+  diff.wf,
+  resamples = diff.training.folds,
+  grid = lambda_grid
+)
+
+diff.ridge.lambda %>% collect_metrics()
+
+diff.ridge.lambda %>%
+  collect_metrics() %>%
+  filter(.metric == "rmse") %>%
+  ggplot(aes(x = penalty, y = mean)) +
+  geom_point() +
+  geom_line(color = "red") + 
+  labs(x = "penalty", y = "RMSE", 
+       title = "Tuning Grid for Ridge Regression")
+
+diff.ridge.final <- diff.ridge.lambda %>% select_best(lambda_grid, metric = "rmse")
+
+ridge.wflow.final <- finalize_workflow(diff.wf, parameters = diff.ridge.final)
+
+ridge.wflow.fit <- fit(ridge.wflow.final, data = diff.train)
+
+ridge.wflow.fit
+
+diff.ridge.preds <- predict(ridge.wflow.fit, new_data = diff.test) %>%
+  bind_cols(diff.test)
+
+rmse(diff.ridge.preds, truth = `Run.Diff`, estimate = `.pred`)
+
+
+
+
+
+
+#library(leaps)
+
+Diff.subsets <- regsubsets(Run.Diff ~ ., data = Differences, nvmax=21)
+Diff.summary <- summary(Diff.subsets)
+
+summary(Diff.subsets)
+
+Diff.summary$rsq
+
+model.matrix(Run.Diff ~., Differences)[-1]
+
+pred.matrix <- model.matrix(Run.Diff ~., Differences)[-1]
+response.vector <- Differences$Run.Diff
+
+library(glmnet)
+nrow
+diff.train <- sample(1:nrow(pred.matrix), nrow(pred.matrix))
+diff.test <- (-diff.train)
+response.test <- response.vector[diff.test]
+
+grid <- 10^seq(10, -2, length = 100)
+
+lasso.diff <- glmnet(pred.matrix[x, ], response.vector[x], alpha = 1,
+                    lambda = grid)
+
+plot(lasso.diff)
