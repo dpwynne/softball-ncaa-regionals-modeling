@@ -582,6 +582,7 @@ diff.ridge.lambda <- tune_grid(
 
 diff.ridge.lambda %>% collect_metrics()
 
+#when I did this initially, it gave a nike checkmark. Now there is no true min, should we expand the penalty range?
 diff.ridge.lambda %>%
   collect_metrics() %>%
   filter(.metric == "rmse") %>%
@@ -604,8 +605,59 @@ diff.ridge.preds <- predict(ridge.wflow.fit, new_data = diff.test) %>%
 
 rmse(diff.ridge.preds, truth = `Run.Diff`, estimate = `.pred`)
 
+## Lasso
 
+diff.lasso <- linear_reg(penalty = tune(), mixture = 1) %>% set_engine("glmnet")
 
+lambda_grid <- grid_regular(penalty(), levels = 50)
+
+diff.wf2 <- workflow() %>%
+  add_recipe(diff.recipe) %>%
+  add_model(diff.lasso)
+
+#"a correlation computation is required, but estimate is constant and has 0 standard dev..."
+lasso.lambda <- tune_grid(
+  diff.wf2,
+  resamples = diff.training.folds,
+  grid = lambda_grid
+)
+
+lasso.lambda %>%
+  collect_metrics() %>%
+  filter(.metric == "rmse") %>%
+  ggplot(aes(x = penalty, y = mean)) + 
+  geom_point() +
+  geom_line(color = "red") +
+  labs(x = "penalty", y = "RMSE",
+       title = "Tuning Grid for LASSO")
+
+lambda_grid <- grid_regular(penalty(range = c(log10(0.25), log10(0.5))), levels = 50)
+
+lasso.lambda <- tune_grid(
+  diff.wf2, 
+  resamples = diff.training.folds,
+  grid = lambda_grid
+)
+
+lasso.lambda %>%
+  collect_metrics() %>%
+  filter(.metric == "rmse") %>%
+  ggplot(aes(x = penalty, y = mean)) + 
+  geom_point() +
+  geom_line(color = "red") + 
+  labs(x = "penalty", y = "RMSE",
+       title = "Tuning Grid for LASSO")
+
+lasso.final <- lasso_lambda %>% select_best(lambda_grid, metric = "rmse")
+
+lasso.wflow.final <- finalize_workflow(diff.wf2, lasso.final)
+
+lasso.wflow.fit <- lasso.wflow.final %>% fit(data = diff.train)
+
+lasso.predictions <- predict(lasso.wflow.fit, new_data = diff.test) %>%
+  bind_cols(diff.test)
+
+rmse(lasso.predictions, truth = `Run.Diff`, estimate = `.pred`)
 
 
 
