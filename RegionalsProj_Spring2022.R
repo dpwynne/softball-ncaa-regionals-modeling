@@ -539,7 +539,7 @@ Differences <- mutate(RegionalGames_Std, Doubles = Doubles.home - Doubles.visit,
                       SlgPct = SlgPct.home - SlgPct.visit,
                       SuccessRate = SuccessRate.home - SuccessRate.visit,
                       BA = BA.home - BA.visit)
-keep <- c("HR", "RunsScored", "SB", "CS", "RunsAllowed", "ER", "ERA", "E", "DP", "FieldingPct", "Singles", "TB", "Doubles", "Triples", "SuccessRate", "BA", "Run.Diff", "Home.Win", "Host")
+keep <- c("HR", "RunsScored", "SB", "CS", "RunsAllowed", "ER", "ERA", "E", "DP", "SlgPct", "FieldingPct", "Singles", "TB", "Doubles", "Triples", "SuccessRate", "BA", "Run.Diff", "Home.Win", "Host")
 Differences <- Differences[keep]
 
 library(ggplot2)
@@ -715,5 +715,6 @@ for(i in 1:100)
 counter.2
 misclassification.rate=counter.2/100
 misclassification.rate
-
+accuracy = (100-counter.2)/100
+accuracy
 #try glm with stepAIC predictors that aren't colinear
