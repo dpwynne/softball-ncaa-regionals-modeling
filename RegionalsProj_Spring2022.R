@@ -1,16 +1,16 @@
 #Read in the data
 Softball2015 <- read.csv("Data/Softball2015.csv")
-View(Softball2015)
+
 Softball2016 <- read.csv("Data/Softball2016.csv")
-View(Softball2016)
+
 Softball2017 <- read.csv("Data/Softball2017.csv")
-View(Softball2017)
+
 Softball2018 <- read.csv("Data/Softball2018.csv")
-View(Softball2018)
+
 
 #this is the google spreadsheet
 Regionals <- read.csv("Data/NCAA Tournament Games 2015-2018 - Sheet1 new.csv")
-View(Regionals)
+
 
 library(tidyverse)
 #library(ggplot2)
