@@ -216,6 +216,8 @@ test5 <- glm(Home.Win ~ Host*(HR +
 
 fit.logi5 <- test5 %>% predict(diff.test, type="response")
 
+modelsummary <- summary(test5)
+
 logi.predicted5 <- ifelse(fit.logi5 > 0.5, "Yes", "No")
 
 counter5=0
@@ -231,6 +233,7 @@ misclass5
 accuracy5 = (100-counter5)/100
 accuracy5
 
+
 #0.76 accuracy with test 5 which kept HR, Runs Allowed, DP, SlgPct, FieldingPct, Singles, Doubles, Triples, and Batting avg
 #also Host interaction with HR, Runs Allowed, DP, and FieldingPct
 
@@ -242,7 +245,7 @@ Softball2022 <- read.csv("Data/Softball2022.csv")
 
 
 
-#this is the google spreadsheet
+#read in spreadsheets for 2019, 2021, 2022
 Games2019 <- read.csv("Data/NCAA 2019 Regional Games.csv")
 Games2021 <- read.csv("Data/NCAA 2021 Regional Games.csv")
 Games2022 <- read.csv("Data/NCAA 2022 Regional Games.csv")
@@ -253,17 +256,19 @@ NCAA2021 <- filter(Softball2021, NCAA %in% c("Yes"))
 NCAA2022 <- filter(Softball2022, NCAA %in% c("Yes"))
 
 #gets rid of extra columns in 2022
-NCAA2022 <- subset(NCAA2022, select=-c(X, X.1, X.2, X.3, X.4, X.5, X.6, X.7, X.8, X.9, X.10, X.11, X.12, X.13, X.14, X.15, X.16, X.17, X.18))
+#NCAA2022 <- subset(NCAA2022, select=-c(X, X.1, X.2, X.3, X.4, X.5, X.6, X.7, X.8, X.9, X.10, X.11, X.12, X.13, X.14, X.15, X.16, X.17, X.18))
 
 #adds year variable
 NCAA2019 <- mutate(NCAA2019, Year=2019)
 NCAA2021 <- mutate(NCAA2021, Year=2021)
 NCAA2022 <- mutate(NCAA2022, Year=2022)
 
+#moves year column to front
 NCAA2019 <- NCAA2019[, c(35,1:34)]
 NCAA2021 <- NCAA2021[, c(36,1:35)]
 NCAA2022 <- NCAA2022[, c(36,1:35)]
 
+#adds stats to match RegionalGames_Std
 NCAA2019 <- mutate(NCAA2019, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, 
                         TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
                         SlgPct = TB/AB, SuccessRate = SB/(SB+CS), BA=H/AB)
@@ -274,6 +279,7 @@ NCAA2022 <- mutate(NCAA2022, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Double
                    TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
                    SlgPct = TB/AB, SuccessRate = SB/(SB+CS), BA=H/AB)
 
+#joins game data with stat data by team name for both home and visiting
 Regionals2019 <- Games2019 %>% left_join(NCAA2019, by = c("Home.Team" = "Name", "Year"),  
                                                           suffix = c(".x", ".home")) %>% left_join(NCAA2019, 
                                                                                                    by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
@@ -286,7 +292,7 @@ Regionals2022 <- Games2022 %>% left_join(NCAA2022, by = c("Home.Team" = "Team", 
                                           suffix = c(".x", ".home")) %>% left_join(NCAA2022, 
                                                                                    by = c("Visiting.Team" = "Team", "Year"), suffix = c(".home",".visit"))
 
-#Adds column indicating home team win
+#Adds column indicating yes/no for home team win
 Regionals2019 <- mutate(Regionals2019, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
 
 Regionals2021 <- mutate(Regionals2021, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
@@ -352,7 +358,7 @@ Regionals2022 <- mutate(Regionals2022,
                                         Regional.Host==Visiting.Team~-1,
                                         Regional.Host != Home.Team & Regional.Host != Visiting.Team ~ 0) )
 
-
+#creates new dataframe that includes the difference between important stats
 Differences2019 <- mutate(Regionals2019, Doubles = Doubles.home - Doubles.visit, 
                       Triples = Triples.home - Triples.visit,
                       HR = HR.home - HR.visit, 
@@ -416,6 +422,22 @@ Differences2022 <- mutate(Regionals2022, Doubles = Doubles.home - Doubles.visit,
                           SuccessRate = SuccessRate.home - SuccessRate.visit,
                           BA = BA.home - BA.visit)
 
+
+#from line 205 so I don't have to scroll to see the model
+# test5 <- glm(Home.Win ~ Host*(HR + 
+#                                 RunsScored + 
+#                                 RunsAllowed +
+#                                 DP + 
+#                                 SlgPct + 
+#                                 FieldingPct + 
+#                                 Singles +  
+#                                 Doubles + 
+#                                 Triples + 
+#                                 SuccessRate + 
+#                                 BA), family = binomial, data = diff.train) %>% MASS::stepAIC()
+
+
+#uses 2019 as validation set for test5
 validation2019 <- test5 %>% predict(Differences2019, type="response")
 
 predicted2019 <- ifelse(validation2019 > 0.5, "Yes", "No")
@@ -434,3 +456,44 @@ accuracy2019 = (100-counter2019)/100
 accuracy2019
 
 #71% accuracy for test 5 on validation set 
+
+#formula
+prob = -0.01087
+
+#test on 2021
+test2021 <- test5 %>% predict(Differences2021, type = "response")
+
+predicted2021 <- ifelse(test2021 > 0.5, "Yes", "No")
+
+counter2021 = 0
+for(i in 1:93)
+{
+  if(predicted2021[i] != Differences2021$Home.Win[i])
+  {counter2021 = counter2021 + 1}
+}
+
+misclass2021 = counter2021/100
+accuracy2021 = 1 - misclass2021
+accuracy2021
+#accuracy 2021 = 74%
+
+#test on 2022
+test2022 <- test5 %>% predict(Differences2022, type = "response")
+
+predicted2022 <- ifelse(test2022 > 0.5, "Yes", "No")
+
+counter2022 = 0
+for(i in 1:102)
+{
+  if(predicted2022[i] != Differences2022$Home.Win[i])
+  {counter2022 = counter2022 + 1}
+}
+
+misclass2022 = counter2022/100
+accuracy2022 = 1 - misclass2022
+accuracy2022
+
+
+csuf2022 <- Differences2022[23, ]
+csufprob <- test5 %>% predict(csuf2022, type = "response")
+csufprob
