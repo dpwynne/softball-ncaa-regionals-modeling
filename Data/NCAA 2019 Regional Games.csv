@@ -1,0 +1,105 @@
+Year,Regional Host,Game Number,Home Team,Visiting Team,Home Score,Visiting Score,Innings
+2019,James Madison,1,James Madison,DePaul,5,2,7
+2019,James Madison,2,Michigan,Saint Francis,8,0,6
+2019,James Madison,3,Michigan,James Madison,1,0,12
+2019,James Madison,4,DePaul,Saint Francis,3,1,7
+2019,James Madison,5,DePaul,James Madison,0,3,7
+2019,James Madison,6,James Madison,Michigan,3,0,7
+2019,James Madison,7,Michigan,James Madison,1,2,7
+2019,Minnesota,1,Georgia,Drake,6,4,8
+2019,Minnesota,2,Minnesota,North Dakota St.,3,0,7
+2019,Minnesota,3,Minnesota,Georgia,2,1,8
+2019,Minnesota,4,Drake,North Dakota St.,8,0,5
+2019,Minnesota,5,Drake,Georgia,4,7,8
+2019,Minnesota,6,Georgia,Minnesota,1,8,7
+2019,Oklahoma,1,Notre Dame,Wisconsin,2,4,7
+2019,Oklahoma,2,Oklahoma,UMBC,12,0,5
+2019,Oklahoma,3,Wisconsin,Oklahoma,0,4,7
+2019,Oklahoma,4,UMBC,Notre Dame,0,2,7
+2019,Oklahoma,5,Wisconsin,Notre Dame,5,4,7
+2019,Oklahoma,6,Oklahoma,Wisconsin,1,2,7
+2019,Oklahoma,7,Wisconsin,Oklahoma,0,2,7
+2019,UCLA,1,Missouri,Cal St. Fullerton,7,4,7
+2019,UCLA,2,UCLA,Weber St.,6,0,7
+2019,UCLA,3,UCLA,Missouri,9,1,5
+2019,UCLA,4,Cal St. Fullerton,Weber St.,3,7,7
+2019,UCLA,5,Weber St.,Missouri,0,7,7
+2019,UCLA,6,Missouri,UCLA,5,1,7
+2019,UCLA,7,UCLA,Missouri,13,1,5
+2019,Washington,1,Mississippi St.,Seattle U,5,3,7
+2019,Washington,2,Washington,Fordham,2,0,7
+2019,Washington,3,Washington,Mississippi St.,6,1,7
+2019,Washington,4,Seattle U,Fordham,1,0,8
+2019,Washington,5,Seattle U,Mississippi St.,3,7,7
+2019,Washington,6,Mississippi St.,Washington,0,8,7
+2019,Florida St.,1,South Carolina,South Fla.,2,3,7
+2019,Florida St.,2,Florida St.,Bethune-Cookman,8,0,5
+2019,Florida St.,3,South Fla.,Florida St.,1,12,5
+2019,Florida St.,4,Bethune-Cookman,South Carolina,0,10,5
+2019,Florida St.,5,South Fla.,South Carolina,1,2,10
+2019,Florida St.,6,South Carolina,Florida St.,6,7,7
+2019,Florida,1,Stanford,Boise St.,1,9,7
+2019,Florida,2,Florida,Boston U.,3,0,7
+2019,Florida,3,Boise St.,Florida,0,8,5
+2019,Florida,4,Boston U.,Stanford,2,13,5
+2019,Florida,5,Boise St.,Stanford,2,0,7
+2019,Florida,6,Florida,Boise St.,5,0,7
+2019,Arizona,1,Auburn,Colorado St.,10,5,7
+2019,Arizona,2,Arizona,Harvard,5,1,7
+2019,Arizona,3,Arizona,Auburn,2,1,7
+2019,Arizona,4,Colorado St. ,Harvard,6,0,7
+2019,Arizona,5,Colorado St. ,Auburn,0,8,5
+2019,Arizona,6,Auburn,Arizona,3,12,7
+2019,Alabama,1,Arizona St.,Lipscomb,4,3,7
+2019,Alabama,2,Alabama,Alabama St.,8,2,7
+2019,Alabama,3,Alabama,Arizona St.,7,4,7
+2019,Alabama,4,Lipscomb,Alabama St.,14,0,5
+2019,Alabama,5,Lipscomb,Arizona St.,1,10,6
+2019,Alabama,6,Arizona St.,Alabama,8,9,7
+2019,Texas,1,Houston,Texas A&M,3,1,7
+2019,Texas,2,Texas,Sam Houston St.,1,2,7
+2019,Texas,3,Sam Houston St.,Houston,0,5,7
+2019,Texas,4,Texas A&M,Texas,2,3,8
+2019,Texas,5,Sam Houston St.,Texas,0,3,7
+2019,Texas,6,Texas,Houston,5,2,7
+2019,Texas,7,Houston,Texas,0,7,7
+2019,LSU,1,Texas Tech,Louisiana Tech,3,0,7
+2019,LSU,2,LSU,Monmouth,2,0,7
+2019,LSU,3,LSU,Texas Tech,5,4,13
+2019,LSU,4,Louisiana Tech,Monmouth,1,0,7
+2019,LSU,5,Louisiana Tech,Texas Tech,1,3,7
+2019,LSU,6,Texas Tech,LSU,5,4,7
+2019,LSU,7,LSU,Texas Tech,5,1,7
+2019,Ole Miss,1,Louisiana,Southeast Mo. St.,3,2,7
+2019,Ole Miss,2,Ole Miss,Chattanooga,12,0,5
+2019,Ole Miss,3,Ole Miss,Louisiana,0,2,7
+2019,Ole Miss,4,Southeast Mo. St.,Chattanooga,2,1,7
+2019,Ole Miss,5,Southeast Mo. St.,Ole Miss,0,10,5
+2019,Ole Miss,6,Louisiana,Ole Miss,1,5,7
+2019,Ole Miss,7,Ole Miss,Louisiana,5,4,7
+2019,Tennessee,1,North Carolina,Ohio St.,0,1,7
+2019,Tennessee,2,Tennessee,Longwood,8,0,6
+2019,Tennessee,3,Ohio St.,Tennessee,4,12,7
+2019,Tennessee,4,Longwood,North Carolina,1,3,7
+2019,Tennessee,5,Ohio St.,North Carolina,3,5,7
+2019,Tennessee,6,North Carolina,Tennessee,1,0,7
+2019,Tennessee,7,Tennessee,North Carolina,2,0,7
+2019,Oklahoma St.,1,Arkansas,Tulsa,0,5,7
+2019,Oklahoma St.,2,Oklahoma St.,BYU,3,1,7
+2019,Oklahoma St.,3,Tulsa,Oklahoma St.,10,13,7
+2019,Oklahoma St.,4,BYU,Arkansas,6,3,7
+2019,Oklahoma St.,5,Tulsa,BYU,6,4,7
+2019,Oklahoma St.,6,Oklahoma St.,Tulsa,2,1,7
+2019,Kentucky,1,Virginia Tech,Illinois,6,2,7
+2019,Kentucky,2,Kentucky,Toledo,7,2,7
+2019,Kentucky,3,Kentucky,Virginia Tech,8,1,7
+2019,Kentucky,4,Illinois,Toledo,2,0,7
+2019,Kentucky,5,Illinois,Virginia Tech,1,5,7
+2019,Kentucky,6,Virginia Tech,Kentucky,1,11,6
+2019,Northwestern,1,Louisville,Southern Ill.,9,5,7
+2019,Northwestern,2,Northwestern,Detroit Mercy,15,1,5
+2019,Northwestern,3,Northwestern,Louisville,1,2,7
+2019,Northwestern,4,Southern Ill.,Detroit Mercy,2,1,7
+2019,Northwestern,5,Southern Ill.,Northwestern,1,8,7
+2019,Northwestern,6,Louisville,Northwestern,0,7,7
+2019,Northwestern,7,Northwestern,Louisville,4,3,7

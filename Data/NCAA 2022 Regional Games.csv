@@ -1,0 +1,103 @@
+Year,Regional Host,Game Number,Home Team,Visiting Team,Home Score,Visiting Score,Innings
+2022,Oklahoma,1,Texas A&M,Minnesota,5,1,7
+2022,Oklahoma,2,Oklahoma,Prairie View,14,0,5
+2022,Oklahoma,3,Oklahoma,Texas A&M,3,2,7
+2022,Oklahoma,4,Minnesota,Prairie View,13,1,5
+2022,Oklahoma,5,Minnesota,Texas A&M,7,10,7
+2022,Oklahoma,6,Texas A&M,Oklahoma,0,20,5
+2022,UCF,1,Michigan,South Dakota St.,2,1,7
+2022,UCF,2,UCF,Villanova,6,0,7
+2022,UCF,3,UCF,Michigan,3,2,11
+2022,UCF,4,South Dakota St.,Villanova,5,4,9
+2022,UCF,5,South Dakota St.,Michigan,1,4,7
+2022,UCF,6,Michigan,UCF,4,9,7
+2022,Northwestern,1,Notre Dame,McNeese,1,11,5
+2022,Northwestern,2,Northwestern,Oakland,9,2,7
+2022,Northwestern,3,McNeese,Northwestern,3,17,5
+2022,Northwestern,4,Oakland,Notre Dame,1,16,5
+2022,Northwestern,5,McNeese,Notre Dame,3,1,7
+2022,Northwestern,6,Northwestern,McNeese,10,2,5
+2022,Arizona St.,1,LSU,San Diego St.,5,10,7
+2022,Arizona St.,2,Arizona St.,Cal St. Fullerton,5,2,7
+2022,Arizona St.,3,San Diego St.,Arizona St.,8,11,7
+2022,Arizona St.,4,Cal St. Fullerton,LSU,3,2,7
+2022,Arizona St.,5,San Diego St.,Cal St. Fullerton,8,5,7
+2022,Arizona St.,6,Arizona St.,San Diego St.,5,4,7
+2022,UCLA,1,Ole Miss,LMU (CA),2,4,7
+2022,UCLA,2,UCLA,Grand Canyon,12,1,5
+2022,UCLA,3,LMU (CA),UCLA,1,7,7
+2022,UCLA,4,Grand Canyon,Ole Miss,5,9,7
+2022,UCLA,5,LMU (CA),Ole Miss,2,4,7
+2022,UCLA,6,Ole Miss,UCLA,1,9,5
+2022,Duke,1,Georgia,Liberty,0,2,7
+2022,Duke,2,Duke,UMBC,4,0,7
+2022,Duke,3,Liberty,Duke,0,5,7
+2022,Duke,4,UMBC,Georgia,3,6,7
+2022,Duke,5,Liberty,Georgia,2,7,7
+2022,Duke,6,Georgia,Duke,5,3,7
+2022,Duke,7,Duke,Georgia,13,5,6
+2022,Washington,1,Texas,Weber St.,6,0,7
+2022,Washington,2,Washington,Lehigh,9,2,7
+2022,Washington,3,Washington,Texas,2,8,7
+2022,Washington,4,Weber St.,Lehigh,4,5,7
+2022,Washington,5,Lehigh,Washington,1,6,7
+2022,Washington,6,Texas,Washington,1,2,7
+2022,Washington,7,Washington,Texas,2,3,4
+2022,Arkansas,1,Arkansas,Princeton,11,0,5
+2022,Arkansas,2,Oregon,Wichita St.,10,2,5
+2022,Arkansas,3,Arkansas,Oregon,6,2,7
+2022,Arkansas,4,Wichita St.,Princeton,5,4,7
+2022,Arkansas,5,Wichita St.,Oregon,1,8,7
+2022,Arkansas,6,Oregon,Arkansas,3,9,7
+2022,Virginia Tech,1,Virginia Tech,Saint Francis (PA),4,0,7
+2022,Virginia Tech,2,Kentucky,Miami (OH),15,1,5
+2022,Virginia Tech,3,Virginia Tech,Kentucky,4,5,7
+2022,Virginia Tech,4,Miami (OH),Saint Francis (PA),4,0,7
+2022,Virginia Tech,5,Miami (OH),Virginia Tech,4,5,7
+2022,Virginia Tech,6,Kentucky,Virginia Tech,2,9,7
+2022,Virginia Tech,7,Virginia Tech,Kentucky,5,4,7
+2022,Florida,1,Georgia Tech,Wisconsin,2,1,7
+2022,Florida,2,Florida,Canisius,10,1,5
+2022,Florida,3,Florida,Georgia Tech,7,1,7
+2022,Florida,4,Wisconsin,Canisius,3,0,7
+2022,Florida,5,Wisconsin,Georgia Tech,7,6,7
+2022,Florida,6,Wisconsin,Florida,0,11,5
+2022,Tennessee,1,Ohio St.,Oregon St.,3,4,7
+2022,Tennessee,2,Tennessee,Campbell,9,1,6
+2022,Tennessee,3,Oregon St.,Tennessee,0,3,7
+2022,Tennessee,4,Campbell,Ohio St.,0,10,6
+2022,Tennessee,5,Oregon St.,Ohio St.,5,1,7
+2022,Tennessee,6,Tennessee,Oregon St.,3,8,7
+2022,Tennessee,7,Oregion St.,Tennessee,3,1,7
+2022,Alabama,1,Alabama,Chattanooga,3,0,7
+2022,Alabama,2,Stanford,Murray St.,3,1,7
+2022,Alabama,3,Alabama,Stanford,0,6,7
+2022,Alabama,4,Murray St.,Chattanooga,0,1,8
+2022,Alabama,5,Chattanooga,Alabama,2,6,7
+2022,Alabama,6,Stanford,Alabama,0,4,7
+2022,Alabama,7,Alabama,Stanford,0,6,7
+2022,Oklahoma St.,1,Nebraska,North Texas,3,0,7
+2022,Oklahoma St.,2,Oklahoma St.,Fordham,12,0,5
+2022,Oklahoma St.,3,Oklahoma St.,Nebraska,7,4,7
+2022,Oklahoma St.,4,North Texas,Fordham,5,3,7
+2022,Oklahoma St.,5,North Texas,Nebraska,3,0,
+2022,Oklahoma St.,6,North Texas,Oklahoma St.,0,2,7
+2022,Clemson,1,Clemson,UNCW,9,0,5
+2022,Clemson,2,Auburn,Louisiana,4,3,7
+2022,Clemson,3,Clemson,Auburn,1,0,7
+2022,Clemson,4,Louisiana,UNCW,3,1,11
+2022,Clemson,5,Louisiana,Auburn,4,3,7
+2022,Clemson,6,Louisiana,Clemson,0,8,5
+2022,Missouri,1,Missouri,Missouri St.,3,1,7
+2022,Missouri,2,Illinois,Arizona,3,8,7
+2022,Missouri,3,Arizona,Missouri,2,0,7
+2022,Missouri,4,Missouri St.,Illinois,2,0,7
+2022,Missouri,5,Missouri,Missouri St.,0,2,7
+2022,Missouri,6,Missouri,Arizona,0,1,7
+2022,Florida St.,1,Mississippi St.,South Fla.,0,4,7
+2022,Florida St.,2,Florida St.,Howard,8,0,5
+2022,Florida St.,3,South Fla.,Florida St.,0,8,5
+2022,Florida St.,4,Howard,Mississippi St.,3,6,7
+2022,Florida St.,5,South Fla.,Mississippi St.,0,6,7
+2022,Florida St.,6,Mississippi St.,Florida St.,5,0,7
+2022,Florida St.,7,Florida St.,Mississippi St.,3,4,7
