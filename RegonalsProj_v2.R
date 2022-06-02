@@ -163,7 +163,7 @@ misclass2
 accuracy2 = (100-counter2)/100
 accuracy2
 
-test3 <- glm(Home.Win ~ Host*(Triples + FieldingPct + SlgPct + SuccessRate), family = binomial, data = diff.train) %>% MASS::stepAIC()
+test3 <- glm(Home.Win ~ Host*(Triples + Singles + Doubles + HR + FieldingPct + SlgPct + SuccessRate), family = binomial, data = diff.train) %>% MASS::stepAIC()
 
 fit.logi3 <- test3 %>% predict(diff.test, type="response")
 
@@ -201,3 +201,236 @@ misclass4=counter4/100
 misclass4
 accuracy4 = (100-counter4)/100
 accuracy4
+
+test5 <- glm(Home.Win ~ Host*(HR + 
+                                RunsScored + 
+                                RunsAllowed +
+                                DP + 
+                                SlgPct + 
+                                FieldingPct + 
+                                Singles +  
+                                Doubles + 
+                                Triples + 
+                                SuccessRate + 
+                                BA), family = binomial, data = diff.train) %>% MASS::stepAIC()
+
+fit.logi5 <- test5 %>% predict(diff.test, type="response")
+
+logi.predicted5 <- ifelse(fit.logi5 > 0.5, "Yes", "No")
+
+counter5=0
+for(i in 1:100)
+{
+  if(logi.predicted5[i] !=diff.test$Home.Win[i])
+  {counter5=counter5+1}
+}
+
+counter5
+misclass5=counter5/100
+misclass5
+accuracy5 = (100-counter5)/100
+accuracy5
+
+#0.76 accuracy with test 5 which kept HR, Runs Allowed, DP, SlgPct, FieldingPct, Singles, Doubles, Triples, and Batting avg
+#also Host interaction with HR, Runs Allowed, DP, and FieldingPct
+
+Softball2019 <- read.csv("Data/Softball2019.csv")
+
+Softball2021 <- read.csv("Data/Softball2021.csv")
+
+Softball2022 <- read.csv("Data/Softball2022.csv")
+
+
+
+#this is the google spreadsheet
+Games2019 <- read.csv("Data/NCAA 2019 Regional Games.csv")
+Games2021 <- read.csv("Data/NCAA 2021 Regional Games.csv")
+Games2022 <- read.csv("Data/NCAA 2022 Regional Games.csv")
+
+#filters each data set into teams that went to Regionals
+NCAA2019 <- filter(Softball2019, NCAA %in% c("At-large","Auto"))
+NCAA2021 <- filter(Softball2021, NCAA %in% c("Yes"))
+NCAA2022 <- filter(Softball2022, NCAA %in% c("Yes"))
+
+#gets rid of extra columns in 2022
+NCAA2022 <- subset(NCAA2022, select=-c(X, X.1, X.2, X.3, X.4, X.5, X.6, X.7, X.8, X.9, X.10, X.11, X.12, X.13, X.14, X.15, X.16, X.17, X.18))
+
+#adds year variable
+NCAA2019 <- mutate(NCAA2019, Year=2019)
+NCAA2021 <- mutate(NCAA2021, Year=2021)
+NCAA2022 <- mutate(NCAA2022, Year=2022)
+
+NCAA2019 <- NCAA2019[, c(35,1:34)]
+NCAA2021 <- NCAA2021[, c(36,1:35)]
+NCAA2022 <- NCAA2022[, c(36,1:35)]
+
+NCAA2019 <- mutate(NCAA2019, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, 
+                        TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
+                        SlgPct = TB/AB, SuccessRate = SB/(SB+CS), BA=H/AB)
+NCAA2021 <- mutate(NCAA2021, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, 
+                   TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
+                   SlgPct = TB/AB, SuccessRate = SB/(SB+CS), BA=H/AB)
+NCAA2022 <- mutate(NCAA2022, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, 
+                   TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
+                   SlgPct = TB/AB, SuccessRate = SB/(SB+CS), BA=H/AB)
+
+Regionals2019 <- Games2019 %>% left_join(NCAA2019, by = c("Home.Team" = "Name", "Year"),  
+                                                          suffix = c(".x", ".home")) %>% left_join(NCAA2019, 
+                                                                                                   by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
+
+Regionals2021 <- Games2021 %>% left_join(NCAA2021, by = c("Home.Team" = "Name", "Year"),  
+                                          suffix = c(".x", ".home")) %>% left_join(NCAA2021, 
+                                                                                   by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
+
+Regionals2022 <- Games2022 %>% left_join(NCAA2022, by = c("Home.Team" = "Team", "Year"),  
+                                          suffix = c(".x", ".home")) %>% left_join(NCAA2022, 
+                                                                                   by = c("Visiting.Team" = "Team", "Year"), suffix = c(".home",".visit"))
+
+#Adds column indicating home team win
+Regionals2019 <- mutate(Regionals2019, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
+
+Regionals2021 <- mutate(Regionals2021, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
+
+Regionals2022 <- mutate(Regionals2022, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
+
+#Creates new data frame that standardizes important variables
+Regionals2019 <- mutate(Regionals2019, Run.Diff = Home.Score-Visiting.Score,
+                            Singles.home = Singles.home/G.home, Singles.visit=Singles.visit/G.visit,
+                            TB.home=TB.home/G.home, TB.visit=TB.visit/G.visit, 
+                            Doubles.home=Doubles.home/G.home, Doubles.visit=Doubles.visit/G.visit,
+                            Triples.home=Triples.home/G.home, Triples.visit=Triples.visit/G.visit,
+                            HR.home=HR.home/G.home, HR.visit=HR.visit/G.visit,
+                            SB.home=SB.home/G.home, SB.visit=SB.visit/G.visit,
+                            CS.home=CS.home/G.home, CS.visit=CS.visit/G.visit,
+                            RunsScored.home=RunsScored.home/G.home, RunsScored.visit=RunsScored.visit/G.visit,
+                            PO.home=PO.home/G.home, PO.visit=PO.visit/G.visit,
+                            A.home=A.home/G.home, A.visit=A.visit/G.visit,
+                            E.home=E.home/G.home, E.visit=E.visit/G.visit,
+                            RunsAllowed.home=RunsAllowed.home/G.home, RunsAllowed.visit=RunsAllowed.visit/G.visit)
+
+Regionals2021 <- mutate(Regionals2021, Run.Diff = Home.Score-Visiting.Score,
+                        Singles.home = Singles.home/G.home, Singles.visit=Singles.visit/G.visit,
+                        TB.home=TB.home/G.home, TB.visit=TB.visit/G.visit, 
+                        Doubles.home=Doubles.home/G.home, Doubles.visit=Doubles.visit/G.visit,
+                        Triples.home=Triples.home/G.home, Triples.visit=Triples.visit/G.visit,
+                        HR.home=HR.home/G.home, HR.visit=HR.visit/G.visit,
+                        SB.home=SB.home/G.home, SB.visit=SB.visit/G.visit,
+                        CS.home=CS.home/G.home, CS.visit=CS.visit/G.visit,
+                        RunsScored.home=RunsScored.home/G.home, RunsScored.visit=RunsScored.visit/G.visit,
+                        PO.home=PO.home/G.home, PO.visit=PO.visit/G.visit,
+                        A.home=A.home/G.home, A.visit=A.visit/G.visit,
+                        E.home=E.home/G.home, E.visit=E.visit/G.visit,
+                        RunsAllowed.home=RunsAllowed.home/G.home, RunsAllowed.visit=RunsAllowed.visit/G.visit)
+
+Regionals2022 <- mutate(Regionals2022, Run.Diff = Home.Score-Visiting.Score,
+                        Singles.home = Singles.home/G.home, Singles.visit=Singles.visit/G.visit,
+                        TB.home=TB.home/G.home, TB.visit=TB.visit/G.visit, 
+                        Doubles.home=Doubles.home/G.home, Doubles.visit=Doubles.visit/G.visit,
+                        Triples.home=Triples.home/G.home, Triples.visit=Triples.visit/G.visit,
+                        HR.home=HR.home/G.home, HR.visit=HR.visit/G.visit,
+                        SB.home=SB.home/G.home, SB.visit=SB.visit/G.visit,
+                        CS.home=CS.home/G.home, CS.visit=CS.visit/G.visit,
+                        RunsScored.home=RunsScored.home/G.home, RunsScored.visit=RunsScored.visit/G.visit,
+                        PO.home=PO.home/G.home, PO.visit=PO.visit/G.visit,
+                        A.home=A.home/G.home, A.visit=A.visit/G.visit,
+                        E.home=E.home/G.home, E.visit=E.visit/G.visit,
+                        RunsAllowed.home=RunsAllowed.home/G.home, RunsAllowed.visit=RunsAllowed.visit/G.visit)
+
+#adds host variable
+Regionals2019 <- mutate(Regionals2019, 
+                            Host= case_when(Regional.Host==Home.Team~1, 
+                                            Regional.Host==Visiting.Team~-1,
+                                            Regional.Host != Home.Team & Regional.Host != Visiting.Team ~ 0) )
+
+Regionals2021 <- mutate(Regionals2021, 
+                        Host= case_when(Regional.Host==Home.Team~1, 
+                                        Regional.Host==Visiting.Team~-1,
+                                        Regional.Host != Home.Team & Regional.Host != Visiting.Team ~ 0) )
+
+Regionals2022 <- mutate(Regionals2022, 
+                        Host= case_when(Regional.Host==Home.Team~1, 
+                                        Regional.Host==Visiting.Team~-1,
+                                        Regional.Host != Home.Team & Regional.Host != Visiting.Team ~ 0) )
+
+
+Differences2019 <- mutate(Regionals2019, Doubles = Doubles.home - Doubles.visit, 
+                      Triples = Triples.home - Triples.visit,
+                      HR = HR.home - HR.visit, 
+                      RunsScored = RunsScored.home - RunsScored.visit,
+                      SB = SB.home - SB.visit, 
+                      CS = CS.home - CS.visit, 
+                      IP = IP.home - IP.visit, 
+                      RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                      ER = ER.home - ER.visit,
+                      ERA = ERA.home - ERA.visit,
+                      PO = PO.home - PO.visit,
+                      A = A.home - A.visit,
+                      E = E.home - E.visit,
+                      DP = DPPerGame.home - DPPerGame.visit,
+                      FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                      Singles = Singles.home - Singles.visit,
+                      TB = TB.home - TB.visit, 
+                      SlgPct = SlgPct.home - SlgPct.visit,
+                      SuccessRate = SuccessRate.home - SuccessRate.visit,
+                      BA = BA.home - BA.visit)
+
+Differences2021 <- mutate(Regionals2021, Doubles = Doubles.home - Doubles.visit, 
+                          Triples = Triples.home - Triples.visit,
+                          HR = HR.home - HR.visit, 
+                          RunsScored = RunsScored.home - RunsScored.visit,
+                          SB = SB.home - SB.visit, 
+                          CS = CS.home - CS.visit, 
+                          IP = IP.home - IP.visit, 
+                          RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                          ER = ER.home - ER.visit,
+                          ERA = ERA.home - ERA.visit,
+                          PO = PO.home - PO.visit,
+                          A = A.home - A.visit,
+                          E = E.home - E.visit,
+                          DP = DPPerGame.home - DPPerGame.visit,
+                          FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                          Singles = Singles.home - Singles.visit,
+                          TB = TB.home - TB.visit, 
+                          SlgPct = SlgPct.home - SlgPct.visit,
+                          SuccessRate = SuccessRate.home - SuccessRate.visit,
+                          BA = BA.home - BA.visit)
+
+Differences2022 <- mutate(Regionals2022, Doubles = Doubles.home - Doubles.visit, 
+                          Triples = Triples.home - Triples.visit,
+                          HR = HR.home - HR.visit, 
+                          RunsScored = RunsScored.home - RunsScored.visit,
+                          SB = SB.home - SB.visit, 
+                          CS = CS.home - CS.visit, 
+                          IP = IP.home - IP.visit, 
+                          RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                          ER = ER.home - ER.visit,
+                          ERA = ERA.home - ERA.visit,
+                          PO = PO.home - PO.visit,
+                          A = A.home - A.visit,
+                          E = E.home - E.visit,
+                          DP = DPPerGame.home - DPPerGame.visit,
+                          FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                          Singles = Singles.home - Singles.visit,
+                          TB = TB.home - TB.visit, 
+                          SlgPct = SlgPct.home - SlgPct.visit,
+                          SuccessRate = SuccessRate.home - SuccessRate.visit,
+                          BA = BA.home - BA.visit)
+
+validation2019 <- test5 %>% predict(Differences2019, type="response")
+
+predicted2019 <- ifelse(validation2019 > 0.5, "Yes", "No")
+
+counter2019=0
+for(i in 1:104)
+{
+  if(predicted2019[i] != Differences2019$Home.Win[i])
+  {counter2019=counter2019+1}
+}
+
+counter2019
+misclass2019=counter2019/100
+misclass2019
+accuracy2019 = (100-counter2019)/100
+accuracy2019
+
+#71% accuracy for test 5 on validation set 
