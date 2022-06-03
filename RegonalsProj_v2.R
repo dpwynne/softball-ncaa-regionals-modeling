@@ -114,9 +114,9 @@ Differences <- mutate(RegionalGames_Std, Doubles = Doubles.home - Doubles.visit,
                       TB = TB.home - TB.visit, 
                       SlgPct = SlgPct.home - SlgPct.visit,
                       SuccessRate = SuccessRate.home - SuccessRate.visit,
-                      BA = BA.home - BA.visit)
-keep <- c("HR", "RunsScored", "SB", "CS", "RunsAllowed", "ER", "ERA", "E", "DP", "SlgPct", "FieldingPct", "Singles", "TB", "Doubles", "Triples", "SuccessRate", "BA", "Run.Diff", "Home.Win", "Host")
-Differences <- Differences[keep]
+                      BA = BA.home - BA.visit,
+                      ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+
 
 Differences$Home.Win <- as.factor(Differences$Home.Win)
 
@@ -424,21 +424,24 @@ Differences2022 <- mutate(Regionals2022, Doubles = Doubles.home - Doubles.visit,
 
 
 #from line 205 so I don't have to scroll to see the model
-# test5 <- glm(Home.Win ~ Host*(HR + 
-#                                 RunsScored + 
-#                                 RunsAllowed +
-#                                 DP + 
-#                                 SlgPct + 
-#                                 FieldingPct + 
-#                                 Singles +  
-#                                 Doubles + 
-#                                 Triples + 
-#                                 SuccessRate + 
-#                                 BA), family = binomial, data = diff.train) %>% MASS::stepAIC()
+test6 <- glm(Home.Win ~ Host+HR +
+                                RunsScored +
+                                RunsAllowed +
+                                DP +
+                                SlgPct +
+                                FieldingPct +
+                                Singles +
+                                Doubles +
+                                Triples +
+                                SuccessRate +
+                                BA + ConferenceDiff, family = binomial, data = Differences) %>% MASS::stepAIC()
 
+Differences2019 <- mutate(Differences2019, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+Differences2021 <- mutate(Differences2021, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+Differences2022 <- mutate(Differences2022, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
 
 #uses 2019 as validation set for test5
-validation2019 <- test5 %>% predict(Differences2019, type="response")
+validation2019 <- test6 %>% predict(Differences2019, type="response")
 
 predicted2019 <- ifelse(validation2019 > 0.5, "Yes", "No")
 
@@ -461,7 +464,7 @@ accuracy2019
 prob = -0.01087
 
 #test on 2021
-test2021 <- test5 %>% predict(Differences2021, type = "response")
+test2021 <- test6 %>% predict(Differences2021, type = "response")
 
 predicted2021 <- ifelse(test2021 > 0.5, "Yes", "No")
 
@@ -478,7 +481,7 @@ accuracy2021
 #accuracy 2021 = 74%
 
 #test on 2022
-test2022 <- test5 %>% predict(Differences2022, type = "response")
+test2022 <- test6 %>% predict(Differences2022, type = "response")
 
 predicted2022 <- ifelse(test2022 > 0.5, "Yes", "No")
 
@@ -497,3 +500,11 @@ accuracy2022
 csuf2022 <- Differences2022[23, ]
 csufprob <- test5 %>% predict(csuf2022, type = "response")
 csufprob
+
+Differences2022[, c("Home.Team", "Visiting.Team", "Home.Win")] %>% cbind(test2022) %>% View()
+
+
+csuf2022_2 <- Differences2022[(Differences2022$Home.Team %in% c("LSU", "San Diego St.", "Cal St. Fullerton", "Arizona St.")), ]
+csufprob2 <- test5 %>% predict(csuf2022_2, type = "response")
+csufprob2
+
