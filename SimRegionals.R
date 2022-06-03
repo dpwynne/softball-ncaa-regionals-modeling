@@ -56,16 +56,6 @@ simulate_regionals <- function(teams, winprobs){
   # Step 2a: Set up a df with 4 rows (1 per team) x 2 columns
   # column 1: chance of being in 1-0 game, column 2: chance of being in 0-1 game
   
-  round1_df <- data.frame(Team = teams, 
-                          W = c(
-                            games_df2$home_win[3],
-                            games_df2$home_win[5],
-                            games_df2$visiting_win[5],
-                            games_df2$visiting_win[3]
-                          )) %>% mutate(
-                          L = 1 - W
-  )
-  
   # Step 3: Simulate second round
   # possibilities for each game: 1 home vs 2 visitor, 1 home vs 3 visitor, 2 home vs 4 visitor, 3 home vs 4 visitor
   # 8 games (4 possibilities * 2 brackets - winner and loser bracket)
@@ -75,28 +65,6 @@ simulate_regionals <- function(teams, winprobs){
   # After Round 2, we should have 4 x 3 matrix
   # Columns: P(WW), P(WL), P(LW)
   # E.g., P(WL) for Team 1 = P(1 vs 2 in Winners)*P(1 loses to 2) + P(1 vs 3 in Winners)*P(1 loses to 3)
-  
-  round2_df <- data.frame(Team = teams,
-                          WW = c(
-                            round1_df$W[1]*round1_df$W[2]*games_df2$home_win[1] + round1_df$W[1]*round1_df$W[3]*games_df2$home_win[2],
-                            round1_df$W[2]*round1_df$W[1]*games_df2$visiting_win[1] + round1_df$W[2]*round1_df$W[4]*games_df2$home_win[6],
-                            round1_df$W[3]*round1_df$W[1]*games_df2$visiting_win[2] + round1_df$W[3]*round1_df$W[4]*games_df2$home_win[9],
-                            round1_df$W[4]*round1_df$W[2]*games_df2$visiting_win[6] + round1_df$W[4]*round1_df$W[3]*games_df2$visiting_win[9]
-                          ),
-                          WL = c(
-                            round1_df$W[1]*round1_df$W[2]*games_df2$visiting_win[1] + round1_df$W[1]*round1_df$W[3]*games_df2$visiting_win[2],
-                            round1_df$W[2]*round1_df$W[1]*games_df2$home_win[1] + round1_df$W[2]*round1_df$W[4]*games_df2$visiting_win[6],
-                            round1_df$W[3]*round1_df$W[1]*games_df2$home_win[2] + round1_df$W[3]*round1_df$W[4]*games_df2$visiting_win[9],
-                            round1_df$W[4]*round1_df$W[2]*games_df2$home_win[6] + round1_df$W[4]*round1_df$W[3]*games_df2$home_win[9]
-                          ),
-                          LW = c(
-                            round1_df$L[1]*round1_df$L[2]*games_df2$home_win[1] + round1_df$L[1]*round1_df$L[3]*games_df2$home_win[2],
-                            round1_df$L[2]*round1_df$L[1]*games_df2$visiting_win[1] + round1_df$L[2]*round1_df$L[4]*games_df2$home_win[6],
-                            round1_df$L[3]*round1_df$L[1]*games_df2$visiting_win[2] + round1_df$L[3]*round1_df$L[4]*games_df2$home_win[9],
-                            round1_df$L[4]*(round1_df$L[2]*games_df2$visiting_win[6] + round1_df$L[3]*games_df2$visiting_win[9])
-                          )
-                          ) %>%
-    mutate(LL = 1 - WW - WL - LW)
   
   # Step 4: Simulate 1-1 game
   # Any of the 12 games
@@ -121,7 +89,6 @@ simulate_regionals <- function(teams, winprobs){
       games_df2$home_win[3]*games_df2$visiting_win[5]*games_df2$visiting_win[6]*games_df2$home_win[2] # 4H 3V 2 1 WW
     )
   
-
   # P(Each team wins | game happens) * P(it happens)
   # Add up probabilities across games to get P(2-1)
   # P(2-1) for Team 1 = P(1 LW, 4 WL)*P(1 beats 4 when home) + P(1 WL, 4 LW)*P(1 beats 4 when visiting) + [same thing for playing 2 and 3]
