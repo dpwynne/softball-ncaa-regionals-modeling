@@ -423,7 +423,7 @@ Differences2022 <- mutate(Regionals2022, Doubles = Doubles.home - Doubles.visit,
                           BA = BA.home - BA.visit)
 
 
-#from line 205 so I don't have to scroll to see the model
+#final model
 test6 <- glm(Home.Win ~ Host+HR +
                                 RunsScored +
                                 RunsAllowed +
@@ -440,7 +440,7 @@ Differences2019 <- mutate(Differences2019, ConferenceDiff = case_when(ConfNumBid
 Differences2021 <- mutate(Differences2021, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
 Differences2022 <- mutate(Differences2022, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
 
-#uses 2019 as validation set for test5
+#uses 2019 as validation set for test6
 validation2019 <- test6 %>% predict(Differences2019, type="response")
 
 predicted2019 <- ifelse(validation2019 > 0.5, "Yes", "No")
@@ -457,8 +457,6 @@ misclass2019=counter2019/100
 misclass2019
 accuracy2019 = (100-counter2019)/100
 accuracy2019
-
-#71% accuracy for test 5 on validation set 
 
 #formula
 prob = -0.01087
@@ -501,10 +499,10 @@ csuf2022 <- Differences2022[23, ]
 csufprob <- test5 %>% predict(csuf2022, type = "response")
 csufprob
 
-Differences2022[, c("Home.Team", "Visiting.Team", "Home.Win")] %>% cbind(test2022) %>% View()
-
+pred_table <- Differences2022[, c("Home.Team", "Visiting.Team", "Home.Win")] %>% cbind(test2022)
+View(pred_table)
 
 csuf2022_2 <- Differences2022[(Differences2022$Home.Team %in% c("LSU", "San Diego St.", "Cal St. Fullerton", "Arizona St.")), ]
-csufprob2 <- test5 %>% predict(csuf2022_2, type = "response")
+csufprob2 <- test6 %>% predict(csuf2022_2, type = "response")
 csufprob2
 
