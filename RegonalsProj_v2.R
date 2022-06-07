@@ -506,3 +506,20 @@ csuf2022_2 <- Differences2022[(Differences2022$Home.Team %in% c("LSU", "San Dieg
 csufprob2 <- test6 %>% predict(csuf2022_2, type = "response")
 csufprob2
 
+goal_est <- filter(Softball2021, WCWS == "Yes" | Name == "Cal St. Fullerton")
+goal_est <- mutate(goal_est, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, 
+                   TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
+                   SlgPct = TB/AB, SuccessRate = SB/(SB+CS), BA=H/AB)
+goal_est <- mutate(goal_est,
+                   Singles = Singles/G,
+                   TB=TB/G,
+                   Doubles=Doubles/G,
+                   Triples=Triples/G,
+                   HR=HR/G,
+                   SB=SB/G,
+                   CS=CS/G,
+                   RunsScored=RunsScored/G,
+                   PO=PO/G,
+                   A=A/G,
+                   E=E/G,
+                   RunsAllowed=RunsAllowed/G)
