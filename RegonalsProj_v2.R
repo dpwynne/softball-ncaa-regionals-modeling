@@ -506,10 +506,15 @@ csuf2022_2 <- Differences2022[(Differences2022$Home.Team %in% c("LSU", "San Dieg
 csufprob2 <- test6 %>% predict(csuf2022_2, type = "response")
 csufprob2
 
+#filter stats data to only WCWS teams and CSUF
 goal_est <- filter(Softball2021, WCWS == "Yes" | Name == "Cal St. Fullerton")
+
+#add other important stats
 goal_est <- mutate(goal_est, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, 
                    TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
                    SlgPct = TB/AB, SuccessRate = SB/(SB+CS), BA=H/AB)
+
+#standardize
 goal_est <- mutate(goal_est,
                    Singles = Singles/G,
                    TB=TB/G,
@@ -523,3 +528,69 @@ goal_est <- mutate(goal_est,
                    A=A/G,
                    E=E/G,
                    RunsAllowed=RunsAllowed/G)
+
+#include only numeric columns to do mean
+goal_est_num <- goal_est[,sapply(goal_est, is.numeric)]
+
+#taking average of WCWS columns as first step to estimating team goals for 2022
+WCWS <- c(1,2,4,5,6,7,8,9)
+avg_WCWS <- colMeans(goal_est_num[WCWS,], na.rm = TRUE)
+
+#second step of goal estimating
+csuf_goal <- (avg_WCWS + goal_est_num[3,])/2
+
+#adding the row to numeric columns with goal stats
+goal_est_num[nrow(goal_est_num) + 1,] <- csuf_goal
+
+#Arizona St. Regional
+est_2022 <- Regionals2022[19:24,]
+which(est_2022$Visiting.Team == "Cal St. Fullerton")
+which(est_2022$Home.Team == "Cal St. Fullerton")
+
+#replacing CSUF visit data with estimated goals
+est_2022$HR.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 1.3039820
+est_2022$RunsAllowed.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 2.631781
+est_2022$DPPerGame.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 0.2656308
+est_2022$SlgPct.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 0.5390819
+est_2022$Singles.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 5.301730
+est_2022$Doubles.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 1.456112
+est_2022$Triples.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 0.1414057
+est_2022$BA.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 0.3195273
+
+#replacing CSUF home data with estimated goals
+est_2022$HR.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 1.3039820
+est_2022$RunsAllowed.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 2.631781
+est_2022$DPPerGame.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 0.2656308
+est_2022$SlgPct.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 0.5390819
+est_2022$Singles.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 5.301730
+est_2022$Doubles.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 1.456112
+est_2022$Triples.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 0.1414057
+est_2022$BA.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 0.3195273
+
+#recreating Differences data on regional to apply model
+Differences_est <- mutate(est_2022, Doubles = Doubles.home - Doubles.visit, 
+                                             Triples = Triples.home - Triples.visit,
+                                             HR = HR.home - HR.visit, 
+                                             RunsScored = RunsScored.home - RunsScored.visit,
+                                             SB = SB.home - SB.visit, 
+                                             CS = CS.home - CS.visit, 
+                                             IP = IP.home - IP.visit, 
+                                             RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                                             ER = ER.home - ER.visit,
+                                             ERA = ERA.home - ERA.visit,
+                                             PO = PO.home - PO.visit,
+                                             A = A.home - A.visit,
+                                             E = E.home - E.visit,
+                                             DP = DPPerGame.home - DPPerGame.visit,
+                                             FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                                             Singles = Singles.home - Singles.visit,
+                                             TB = TB.home - TB.visit, 
+                                             SlgPct = SlgPct.home - SlgPct.visit,
+                                             SuccessRate = SuccessRate.home - SuccessRate.visit,
+                                             BA = BA.home - BA.visit)
+Differences_est <-  mutate(Differences_est, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+
+#apply model to regional
+est.goals.prob <- test6 %>% predict(Differences_est, type = "response")
+est.goals.prob
+
