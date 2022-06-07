@@ -25,13 +25,33 @@ predict_regionals_games <- function(teams, stats, game_model){
   ) 
   
   games_stats <- games_df %>%
-    left_join() %>% # replace line 28 with the code to join the stats dataset
+    left_join(NCAA2022, by = c("Home.Team" = "Team", "Year"),  
+                                             suffix = c(".x", ".home")) %>% left_join(NCAA2022, 
+                                                                                      by = c("Visiting.Team" = "Team", "Year"), suffix = c(".home",".visit")) %>%
     mutate(
       Host = case_when(Home.Team == teams[1] ~ 1,
                        Visiting.Team == teams[1] ~ -1,
                        TRUE ~ 0),
-      # Rest of the differences stuff
-    )
+      Doubles = Doubles.home - Doubles.visit, 
+                                Triples = Triples.home - Triples.visit,
+                                HR = HR.home - HR.visit, 
+                                RunsScored = RunsScored.home - RunsScored.visit,
+                                SB = SB.home - SB.visit, 
+                                CS = CS.home - CS.visit, 
+                                IP = IP.home - IP.visit, 
+                                RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                                ER = ER.home - ER.visit,
+                                ERA = ERA.home - ERA.visit,
+                                PO = PO.home - PO.visit,
+                                A = A.home - A.visit,
+                                E = E.home - E.visit,
+                                DP = DPPerGame.home - DPPerGame.visit,
+                                FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                                Singles = Singles.home - Singles.visit,
+                                TB = TB.home - TB.visit, 
+                                SlgPct = SlgPct.home - SlgPct.visit,
+                                SuccessRate = SuccessRate.home - SuccessRate.visit,
+                                BA = BA.home - BA.visit)
   
   games_predictions <- predict(game_model, newdata = games_stats, type = "response")
   
