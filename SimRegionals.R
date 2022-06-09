@@ -6,7 +6,18 @@ predict_regionals_games <- function(teams, stats, game_model){
   # teams: a vector of four teams, seeded 1-4 with Team 1 = Host
   # stats: a data frame of all the season stats for teams
   # game_model: the glm containing the coefficients for the model
-  
+  stats <- mutate(stats, Singles = Singles/G,
+                  TB=TB/G,
+                  Doubles=Doubles/G,
+                  Triples=Triples/G,
+                  HR=HR/G,
+                  SB=SB/G,
+                  CS=CS/G,
+                  RunsScored=RunsScored/G,
+                  PO=PO/G,
+                  A=A/G,
+                  E=E/G,
+                  RunsAllowed=RunsAllowed/G)
   regionals_stats <- stats %>% filter(Team %in% teams)  # filter the dataset to get the host
   
   # Step 1: find the chance of each team winning under each home vs. visitor
@@ -25,9 +36,9 @@ predict_regionals_games <- function(teams, stats, game_model){
   ) 
   
   games_stats <- games_df %>%
-    left_join(NCAA2022, by = c("Home.Team" = "Team", "Year"),  
-                                             suffix = c(".x", ".home")) %>% left_join(NCAA2022, 
-                                                                                      by = c("Visiting.Team" = "Team", "Year"), suffix = c(".home",".visit")) %>%
+    left_join(regionals_stats, by = c("Home.Team" = "Team"),  
+                                             suffix = c(".x", ".home")) %>% left_join(regionals_stats, 
+                                                                                      by = c("Visiting.Team" = "Team"), suffix = c(".home",".visit")) %>%
     mutate(
       Host = case_when(Home.Team == teams[1] ~ 1,
                        Visiting.Team == teams[1] ~ -1,
@@ -51,7 +62,8 @@ predict_regionals_games <- function(teams, stats, game_model){
                                 TB = TB.home - TB.visit, 
                                 SlgPct = SlgPct.home - SlgPct.visit,
                                 SuccessRate = SuccessRate.home - SuccessRate.visit,
-                                BA = BA.home - BA.visit)
+                                BA = BA.home - BA.visit,
+                                ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0))
   
   games_predictions <- predict(game_model, newdata = games_stats, type = "response")
   
@@ -114,13 +126,13 @@ simulate_regionals <- function(teams, winprobs){
   # P(2-1) for Team 1 = P(1 LW, 4 WL)*P(1 beats 4 when home) + P(1 WL, 4 LW)*P(1 beats 4 when visiting) + [same thing for playing 2 and 3]
   # P(2-1) for Team = P(2 LW, 4 WL)*P(2 beats 4 when home) + P(2 WL, 4 LW)*P(2 beats 4 when visiting) + [same idea for opponents 1 and 3]  
 
-  round3_df <- data.frame(Team = teams,
-                          W21 = c(
-                            sum(R3[c(1, 2, 3, 4)]*games_df3$home_win[c(1, 2, 3, 3)] + R3[c(5, 9, 13, 14)]*games_df3$visiting_win[c(4, 7, 10, 10)]),
-                            sum(R3[c(5, 6, 7, 8)]*games_df3$home_win[c(4, 5, 5, 6)] + R3[c(1, 10, 11, 15)]*games_df3$visiting_win[c(1, 8, 8, 11)]),
-                            sum(R3[c(9, 10, 11, 12)]*games_df3$home_win[c(7, 8, 8, 9)] + R3[c(2, 6, 7, 16)]*games_df3$visiting_win[c(2, 5, 5, 12)]),
-                            sum(R3[c(13, 14, 15, 16)]*games_df3$home_win[c(10, 10, 11, 12)] + R3[c(3, 4, 8, 12)]*games_df3$visiting_win[c(3, 3, 6, 9)])
-                          ))
+  # round3_df <- data.frame(Team = teams,
+  #                         W21 = c(
+  #                           sum(R3[c(1, 2, 3, 4)]*games_df3$home_win[c(1, 2, 3, 3)] + R3[c(5, 9, 13, 14)]*games_df3$visiting_win[c(4, 7, 10, 10)]),
+  #                           sum(R3[c(5, 6, 7, 8)]*games_df3$home_win[c(4, 5, 5, 6)] + R3[c(1, 10, 11, 15)]*games_df3$visiting_win[c(1, 8, 8, 11)]),
+  #                           sum(R3[c(9, 10, 11, 12)]*games_df3$home_win[c(7, 8, 8, 9)] + R3[c(2, 6, 7, 16)]*games_df3$visiting_win[c(2, 5, 5, 12)]),
+  #                           sum(R3[c(13, 14, 15, 16)]*games_df3$home_win[c(10, 10, 11, 12)] + R3[c(3, 4, 8, 12)]*games_df3$visiting_win[c(3, 3, 6, 9)])
+  #                         ))
   
   # Step 5: Simulate 2-0 vs. 2-1 game
   # 2-0 team (WW from Step 3) is visitor, 2-1 (from Step 4) is home
