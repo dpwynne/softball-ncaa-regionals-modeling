@@ -1,0 +1,563 @@
+---
+title: "2022 Regionals Predictive Modeling"
+author: "Emily Murphy, Dwight Wynne"
+date: "6/14/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r setup2, include = FALSE, echo=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(lattice)
+library(caret)
+library(tidymodels)
+library(parsnip)
+library(dplyr)
+library(gt)
+Softball2015 <- read.csv("Data/Softball2015.csv")
+
+Softball2016 <- read.csv("Data/Softball2016.csv")
+
+Softball2017 <- read.csv("Data/Softball2017.csv")
+
+Softball2018 <- read.csv("Data/Softball2018.csv")
+
+
+#this is the google spreadsheet
+Regionals <- read.csv("Data/NCAA Tournament Games 2015-2018 - Sheet1 new.csv")
+#filters each data set into teams that went to Regionals
+NCAA2015 <- filter(Softball2015, NCAA %in% c("At-large","Auto"))
+NCAA2016 <- filter(Softball2016, NCAA %in% c("At-large","Auto"))
+NCAA2017 <- filter(Softball2017, NCAA %in% c("At-large","Auto"))
+NCAA2018 <- filter(Softball2018, NCAA %in% c("At-large","Auto"))
+
+#adds year variable
+NCAA2015 <- mutate(NCAA2015, Year=2015)
+NCAA2016 <- mutate(NCAA2016, Year=2016)
+NCAA2017 <- mutate(NCAA2017, Year=2017)
+NCAA2018 <- mutate(NCAA2018, Year=2018)
+
+#cannot row bind unless number of columns are equal; this removes extra columns in 2018 data set
+NCAA2018 <- subset(NCAA2018, select=-c(PitcherK, PitcherBB))
+
+#row binds the four datasets
+RegionalStats <- data.frame(rbind(NCAA2015,NCAA2016,NCAA2017,NCAA2018))
+
+#reorders columns so year is first
+RegionalStats <- RegionalStats[, c(32,1:31)]
+
+#Adds stats: fielding percentage, singles, total bases, double plays per game, slugging percentage, success rate of stolen bases
+#second line adds batting average
+RegionalStats <- mutate(RegionalStats, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, 
+                        TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
+                        SlgPct = TB/AB, SuccessRate = SB/(SB+CS))
+RegionalStats <- mutate(RegionalStats, BA=H/AB)
+
+#Joins Regionals and stats into one data frame by game
+RegionalGames <- Regionals %>% left_join(RegionalStats, by = c("Home.Team" = "Name", "Year"),  
+                                         suffix = c(".x", ".home")) %>% left_join(RegionalStats, 
+                                                                                  by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
+
+#Adds column indicating home team win
+RegionalGames <- mutate(RegionalGames, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
+
+#Adds column indicating run differental (absolute value of Home-Visiting runs)
+RegionalGames <- mutate(RegionalGames, Run.Diff = Home.Score-Visiting.Score)
+
+#Creates new data frame that standardizes important variables
+RegionalGames_Std <- mutate(RegionalGames, Run.Diff = Home.Score-Visiting.Score,
+                            Singles.home = Singles.home/G.home, Singles.visit=Singles.visit/G.visit,
+                            TB.home=TB.home/G.home, TB.visit=TB.visit/G.visit, 
+                            Doubles.home=Doubles.home/G.home, Doubles.visit=Doubles.visit/G.visit,
+                            Triples.home=Triples.home/G.home, Triples.visit=Triples.visit/G.visit,
+                            HR.home=HR.home/G.home, HR.visit=HR.visit/G.visit,
+                            SB.home=SB.home/G.home, SB.visit=SB.visit/G.visit,
+                            CS.home=CS.home/G.home, CS.visit=CS.visit/G.visit,
+                            RunsScored.home=RunsScored.home/G.home, RunsScored.visit=RunsScored.visit/G.visit,
+                            PO.home=PO.home/G.home, PO.visit=PO.visit/G.visit,
+                            A.home=A.home/G.home, A.visit=A.visit/G.visit,
+                            E.home=E.home/G.home, E.visit=E.visit/G.visit,
+                            RunsAllowed.home=RunsAllowed.home/G.home, RunsAllowed.visit=RunsAllowed.visit/G.visit)
+
+#Adds column indicating if home team or visiting team (or neither) is regional host
+RegionalGames_Std <- mutate(RegionalGames_Std, 
+                            Host= case_when(Regional.Host==Home.Team~1, 
+                                            Regional.Host==Visiting.Team~-1,
+                                            Regional.Host != Home.Team & Regional.Host != Visiting.Team ~ 0) )
+Differences <- mutate(RegionalGames_Std, Doubles = Doubles.home - Doubles.visit, 
+                      Triples = Triples.home - Triples.visit,
+                      HR = HR.home - HR.visit, 
+                      RunsScored = RunsScored.home - RunsScored.visit,
+                      SB = SB.home - SB.visit, 
+                      CS = CS.home - CS.visit, 
+                      IP = IP.home - IP.visit, 
+                      RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                      ER = ER.home - ER.visit,
+                      ERA = ERA.home - ERA.visit,
+                      PO = PO.home - PO.visit,
+                      A = A.home - A.visit,
+                      E = E.home - E.visit,
+                      DP = DPPerGame.home - DPPerGame.visit,
+                      FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                      Singles = Singles.home - Singles.visit,
+                      TB = TB.home - TB.visit, 
+                      SlgPct = SlgPct.home - SlgPct.visit,
+                      SuccessRate = SuccessRate.home - SuccessRate.visit,
+                      BA = BA.home - BA.visit,
+                      ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+
+
+Differences$Home.Win <- as.factor(Differences$Home.Win)
+Softball2019 <- read.csv("Data/Softball2019.csv")
+
+Softball2021 <- read.csv("Data/Softball2021.csv")
+
+Softball2022 <- read.csv("Data/Softball2022.csv")
+
+
+
+#read in spreadsheets for 2019, 2021, 2022
+Games2019 <- read.csv("Data/NCAA 2019 Regional Games.csv")
+Games2021 <- read.csv("Data/NCAA 2021 Regional Games.csv")
+Games2022 <- read.csv("Data/NCAA 2022 Regional Games.csv")
+
+#filters each data set into teams that went to Regionals
+NCAA2019 <- filter(Softball2019, NCAA %in% c("At-large","Auto"))
+NCAA2021 <- filter(Softball2021, NCAA %in% c("Yes"))
+NCAA2022 <- filter(Softball2022, NCAA %in% c("Yes"))
+
+#gets rid of extra columns in 2022
+#NCAA2022 <- subset(NCAA2022, select=-c(X, X.1, X.2, X.3, X.4, X.5, X.6, X.7, X.8, X.9, X.10, X.11, X.12, X.13, X.14, X.15, X.16, X.17, X.18))
+
+#adds year variable
+NCAA2019 <- mutate(NCAA2019, Year=2019)
+NCAA2021 <- mutate(NCAA2021, Year=2021)
+NCAA2022 <- mutate(NCAA2022, Year=2022)
+
+#moves year column to front
+NCAA2019 <- NCAA2019[, c(35,1:34)]
+NCAA2021 <- NCAA2021[, c(36,1:35)]
+NCAA2022 <- NCAA2022[, c(36,1:35)]
+
+#adds stats to match RegionalGames_Std
+NCAA2019 <- mutate(NCAA2019, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, 
+                        TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
+                        SlgPct = TB/AB, SuccessRate = SB/(SB+CS), BA=H/AB)
+NCAA2021 <- mutate(NCAA2021, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, 
+                   TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
+                   SlgPct = TB/AB, SuccessRate = SB/(SB+CS), BA=H/AB)
+NCAA2022 <- mutate(NCAA2022, FieldingPct = (PO+A)/(PO+A+E), Singles = H - Doubles - Triples - HR, 
+                   TB = Singles + 2*Doubles + 3*Triples + 4*HR, DPPerGame = DP/G, 
+                   SlgPct = TB/AB, SuccessRate = SB/(SB+CS), BA=H/AB)
+
+#joins game data with stat data by team name for both home and visiting
+Regionals2019 <- Games2019 %>% left_join(NCAA2019, by = c("Home.Team" = "Name", "Year"),  
+                                                          suffix = c(".x", ".home")) %>% left_join(NCAA2019, 
+                                                                                                   by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
+
+Regionals2021 <- Games2021 %>% left_join(NCAA2021, by = c("Home.Team" = "Name", "Year"),  
+                                          suffix = c(".x", ".home")) %>% left_join(NCAA2021, 
+                                                                                   by = c("Visiting.Team" = "Name", "Year"), suffix = c(".home",".visit"))
+
+Regionals2022 <- Games2022 %>% left_join(NCAA2022, by = c("Home.Team" = "Team", "Year"),  
+                                          suffix = c(".x", ".home")) %>% left_join(NCAA2022, 
+                                                                                   by = c("Visiting.Team" = "Team", "Year"), suffix = c(".home",".visit"))
+
+#Adds column indicating yes/no for home team win
+Regionals2019 <- mutate(Regionals2019, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
+
+Regionals2021 <- mutate(Regionals2021, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
+
+Regionals2022 <- mutate(Regionals2022, Home.Win = ifelse(Home.Score>Visiting.Score, "Yes", "No"))
+
+#Creates new data frame that standardizes important variables
+Regionals2019 <- mutate(Regionals2019, Run.Diff = Home.Score-Visiting.Score,
+                            Singles.home = Singles.home/G.home, Singles.visit=Singles.visit/G.visit,
+                            TB.home=TB.home/G.home, TB.visit=TB.visit/G.visit, 
+                            Doubles.home=Doubles.home/G.home, Doubles.visit=Doubles.visit/G.visit,
+                            Triples.home=Triples.home/G.home, Triples.visit=Triples.visit/G.visit,
+                            HR.home=HR.home/G.home, HR.visit=HR.visit/G.visit,
+                            SB.home=SB.home/G.home, SB.visit=SB.visit/G.visit,
+                            CS.home=CS.home/G.home, CS.visit=CS.visit/G.visit,
+                            RunsScored.home=RunsScored.home/G.home, RunsScored.visit=RunsScored.visit/G.visit,
+                            PO.home=PO.home/G.home, PO.visit=PO.visit/G.visit,
+                            A.home=A.home/G.home, A.visit=A.visit/G.visit,
+                            E.home=E.home/G.home, E.visit=E.visit/G.visit,
+                            RunsAllowed.home=RunsAllowed.home/G.home, RunsAllowed.visit=RunsAllowed.visit/G.visit)
+
+Regionals2021 <- mutate(Regionals2021, Run.Diff = Home.Score-Visiting.Score,
+                        Singles.home = Singles.home/G.home, Singles.visit=Singles.visit/G.visit,
+                        TB.home=TB.home/G.home, TB.visit=TB.visit/G.visit, 
+                        Doubles.home=Doubles.home/G.home, Doubles.visit=Doubles.visit/G.visit,
+                        Triples.home=Triples.home/G.home, Triples.visit=Triples.visit/G.visit,
+                        HR.home=HR.home/G.home, HR.visit=HR.visit/G.visit,
+                        SB.home=SB.home/G.home, SB.visit=SB.visit/G.visit,
+                        CS.home=CS.home/G.home, CS.visit=CS.visit/G.visit,
+                        RunsScored.home=RunsScored.home/G.home, RunsScored.visit=RunsScored.visit/G.visit,
+                        PO.home=PO.home/G.home, PO.visit=PO.visit/G.visit,
+                        A.home=A.home/G.home, A.visit=A.visit/G.visit,
+                        E.home=E.home/G.home, E.visit=E.visit/G.visit,
+                        RunsAllowed.home=RunsAllowed.home/G.home, RunsAllowed.visit=RunsAllowed.visit/G.visit)
+
+Regionals2022 <- mutate(Regionals2022, Run.Diff = Home.Score-Visiting.Score,
+                        Singles.home = Singles.home/G.home, Singles.visit=Singles.visit/G.visit,
+                        TB.home=TB.home/G.home, TB.visit=TB.visit/G.visit, 
+                        Doubles.home=Doubles.home/G.home, Doubles.visit=Doubles.visit/G.visit,
+                        Triples.home=Triples.home/G.home, Triples.visit=Triples.visit/G.visit,
+                        HR.home=HR.home/G.home, HR.visit=HR.visit/G.visit,
+                        SB.home=SB.home/G.home, SB.visit=SB.visit/G.visit,
+                        CS.home=CS.home/G.home, CS.visit=CS.visit/G.visit,
+                        RunsScored.home=RunsScored.home/G.home, RunsScored.visit=RunsScored.visit/G.visit,
+                        PO.home=PO.home/G.home, PO.visit=PO.visit/G.visit,
+                        A.home=A.home/G.home, A.visit=A.visit/G.visit,
+                        E.home=E.home/G.home, E.visit=E.visit/G.visit,
+                        RunsAllowed.home=RunsAllowed.home/G.home, RunsAllowed.visit=RunsAllowed.visit/G.visit)
+
+#adds host variable
+Regionals2019 <- mutate(Regionals2019, 
+                            Host= case_when(Regional.Host==Home.Team~1, 
+                                            Regional.Host==Visiting.Team~-1,
+                                            Regional.Host != Home.Team & Regional.Host != Visiting.Team ~ 0) )
+
+Regionals2021 <- mutate(Regionals2021, 
+                        Host= case_when(Regional.Host==Home.Team~1, 
+                                        Regional.Host==Visiting.Team~-1,
+                                        Regional.Host != Home.Team & Regional.Host != Visiting.Team ~ 0) )
+
+Regionals2022 <- mutate(Regionals2022, 
+                        Host= case_when(Regional.Host==Home.Team~1, 
+                                        Regional.Host==Visiting.Team~-1,
+                                        Regional.Host != Home.Team & Regional.Host != Visiting.Team ~ 0) )
+
+#creates new dataframe that includes the difference between important stats
+Differences2019 <- mutate(Regionals2019, Doubles = Doubles.home - Doubles.visit, 
+                      Triples = Triples.home - Triples.visit,
+                      HR = HR.home - HR.visit, 
+                      RunsScored = RunsScored.home - RunsScored.visit,
+                      SB = SB.home - SB.visit, 
+                      CS = CS.home - CS.visit, 
+                      IP = IP.home - IP.visit, 
+                      RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                      ER = ER.home - ER.visit,
+                      ERA = ERA.home - ERA.visit,
+                      PO = PO.home - PO.visit,
+                      A = A.home - A.visit,
+                      E = E.home - E.visit,
+                      DP = DPPerGame.home - DPPerGame.visit,
+                      FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                      Singles = Singles.home - Singles.visit,
+                      TB = TB.home - TB.visit, 
+                      SlgPct = SlgPct.home - SlgPct.visit,
+                      SuccessRate = SuccessRate.home - SuccessRate.visit,
+                      BA = BA.home - BA.visit)
+
+Differences2021 <- mutate(Regionals2021, Doubles = Doubles.home - Doubles.visit, 
+                          Triples = Triples.home - Triples.visit,
+                          HR = HR.home - HR.visit, 
+                          RunsScored = RunsScored.home - RunsScored.visit,
+                          SB = SB.home - SB.visit, 
+                          CS = CS.home - CS.visit, 
+                          IP = IP.home - IP.visit, 
+                          RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                          ER = ER.home - ER.visit,
+                          ERA = ERA.home - ERA.visit,
+                          PO = PO.home - PO.visit,
+                          A = A.home - A.visit,
+                          E = E.home - E.visit,
+                          DP = DPPerGame.home - DPPerGame.visit,
+                          FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                          Singles = Singles.home - Singles.visit,
+                          TB = TB.home - TB.visit, 
+                          SlgPct = SlgPct.home - SlgPct.visit,
+                          SuccessRate = SuccessRate.home - SuccessRate.visit,
+                          BA = BA.home - BA.visit)
+
+Differences2022 <- mutate(Regionals2022, Doubles = Doubles.home - Doubles.visit, 
+                          Triples = Triples.home - Triples.visit,
+                          HR = HR.home - HR.visit, 
+                          RunsScored = RunsScored.home - RunsScored.visit,
+                          SB = SB.home - SB.visit, 
+                          CS = CS.home - CS.visit, 
+                          IP = IP.home - IP.visit, 
+                          RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                          ER = ER.home - ER.visit,
+                          ERA = ERA.home - ERA.visit,
+                          PO = PO.home - PO.visit,
+                          A = A.home - A.visit,
+                          E = E.home - E.visit,
+                          DP = DPPerGame.home - DPPerGame.visit,
+                          FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                          Singles = Singles.home - Singles.visit,
+                          TB = TB.home - TB.visit, 
+                          SlgPct = SlgPct.home - SlgPct.visit,
+                          SuccessRate = SuccessRate.home - SuccessRate.visit,
+                          BA = BA.home - BA.visit)
+
+
+#final model
+test6 <- glm(Home.Win ~ Host+HR +
+                                RunsScored +
+                                RunsAllowed +
+                                DP +
+                                SlgPct +
+                                FieldingPct +
+                                Singles +
+                                Doubles +
+                                Triples +
+                                SuccessRate +
+                                BA + ConferenceDiff, family = binomial, data = Differences) %>% MASS::stepAIC()
+
+Differences2019 <- mutate(Differences2019, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+Differences2021 <- mutate(Differences2021, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+Differences2022 <- mutate(Differences2022, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+
+Statistic <- c("CSUF 2022 Actual", "Estimated 2022 Goals", "Changing RA in Model")
+Chances <- c(0.1151719, 0.2503823, 0.203444)
+compare2022AZ <- data.frame(Statistic, Chances)
+compareAZ2 <- compare2022AZ[c(1,2),]
+
+
+Chances_LSU <- c(0.2477817, 0.4580774, 0.3925945)
+compare2022LSU <- data.frame(Statistic, Chances_LSU)
+
+
+Chances_SD <- c(0.4403116, 0.6687409, 0.6068669)
+compare2022SD <- data.frame(Statistic, Chances_SD)
+
+```
+
+Initially, the statistics from the 2015-2018 seasons were merged with the data from the 2015-2018 Regional games to create one set of data that provides each Regional game for a particular year, who the host, home, and visiting teams were, who won each game, and each team's statistics for that season. Figure 1 provides a snapshot of the data.
+
+```{r echo = FALSE}
+RegionalsTable <- RegionalGames_Std[c(1,163,229,359), ] %>% rename(`Regional Host` = Regional.Host, `Game Number` = Game.Number, `Home Team` = Home.Team, `Visiting Team` = Visiting.Team, `Home Score` = Home.Score, `Visiting Score` = Visiting.Score, `Home Team Win?` = Home.Win)
+RegionalsTable %>%
+  gt() %>%
+  cols_align(
+    align = "center"
+  ) %>%
+  tab_header(
+    title = md("**Regional Games and Team Statistics** Years 2015 - 2018"),
+    subtitle = "Figure 1: A sample of rows from the dataset. Home team stats are labeled .home and visiting team stats are labeled .visit"
+  ) %>%
+  opt_align_table_header(align = "left") %>%
+  tab_options(table.border.top.width=3, table.border.top.color="#00274C", table.border.bottom.width=3,table.border.bottom.color="#00274C", 
+              column_labels.border.bottom.color = "#00274C", table_body.hlines.color="#DC8218", column_labels.font.weight="bold")
+```
+
+
+This larger dataset was used to train models that could ultimately output a team's chances of winning a given game based on their statistics. To create these models, different statistics were input that the models would use to make the prediction. Originally, the models were given statistics from both the home and visiting teams individually (not interacting with each other in the model). For example, one of the first models included both the home and visiting (INSERT ALL STATS HERE). Eventually models were built using the differences between home and visiting teams in those statistics. To narrow down the stats that had the greatest effect on predicting whether the home team would win, we used a method for feature selection called stepAIC.  
+
+Doing this resulted in the following (per game) statistics remaining in the model after adjusting for regional host and conference:
+a. Home runs
+b. Runs allowed
+c. Double plays
+d. Slugging percentage
+e. Singles
+f. Doubles
+g. Triples
+h. Batting average
+
+
+Once the final model was selected, we validated it using 2019 Regional games and ultimately tested it on the 2022 Regionals. The model resulted in a 75% accuracy when tested on 2022 games, meaning it accurately predicted the outcome of approximately 75% of the 2022 Regional games. Now, using this model, the chances of a home team winning a given game can be predicted with about 75% accuracy.
+
+
+Given CSUF's 2022 statistics, the model can be used to estimate the chances CSUF had of winning each game in the Arizona St. regional. This can be compared to the chances CSUF would have had according to the model if they had reached what the estimated goals would have been for each statistic this season. These estimated goals were calculated by averaging the 2021 WCWS per game statistics, and then averaging those with CSUF's 2021 per game statistics to obtain a goal for each stat. Again, each statistic was changed to be per game rather than the total to make for easier comparison. 
+
+The following graphs compare CSUF's chances of winning according to the model using CSUF's 2022 stats and what their stats would have been if they had achieved the estimated goals.
+```{r est-goals, echo = FALSE }
+par(mfrow=c(1,3))
+SD <- ggplot(data = compare2022SD[compare2022SD$Statistic!= "Changing RA in Model",], aes(x = Statistic, y = Chances_SD)) + 
+  geom_bar(stat = "identity", width = 0.5, fill = "#FF7900") +
+  theme(plot.caption = element_text(hjust = 0))+
+  labs(title = "Chances of Winning vs. San Diego St.", caption = "Figure 2.1: Note that the chance of winning only increases by ~23%")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances_SD, .11)), 
+            vjust=-0.3, size = 3.5, color = "#00274C")
+SD
+
+LSU <- ggplot(data = compare2022LSU[compare2022LSU$Statistic!= "Changing RA in Model",], aes(x = Statistic, y = Chances_LSU)) + 
+  geom_bar(stat = "identity", width = 0.5, fill = "#FF7900") +
+  theme(plot.caption = element_text(hjust = 0))+
+  labs(title = "Chances of Winning vs. LSU", caption="Figure 2.2: Note that the chance of winning increases by ~21%")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances_LSU, .11)), 
+            vjust=-0.3, size = 3.5, color = "#00274C")
+LSU
+
+Arizona.St <- ggplot(data = compare2022AZ[compare2022AZ$Statistic!= "Changing RA in Model",], aes(x = Statistic, y = Chances)) + 
+  geom_bar(stat = "identity", width = 0.5, fill = "#FF7900") +
+  theme(plot.caption = element_text(hjust = 0))+
+  labs(title = "Chances of Winning vs. Arizona St.", caption="Figure 2.3: Note that the chance of winning only increases by ~13.5%")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances, .11)), 
+            vjust=-0.3, size = 3.5, color = "#00274C")
+Arizona.St
+```
+\newpage If CSUF had met what the estimated goals were for every statistic, their chances of wining the games highlighted above do not increase a notable amount. Rather than using averages to set goals, we can use the model to predict what CSUFs chances of winning would be in a different, potentially more effective way. 
+z
+
+Since the model uses differences between the home and visiting teams for the eight stats it determined are most effective in predicting a win, 
+that can be used to tailor the approach to goal setting. For example, CSUF allowed approximately 4 runs per game in 2022. If a goal was made for the 2023 season to allow an average of 2 runs per game and CSUF does not improve or worsen in any other statistic (leaving every other stat the same as it was in 2022), we can use the model to see how the chances of winning would increase by improving only that statistic. 
+
+The graphs below depict the chances of winning each game upon lowering runs allowed per game from ~4 to 2.
+
+```{r model-goals, echo = FALSE}
+actual_2022 <- Regionals2022[19:24,]
+
+Differences_act <- mutate(actual_2022, Doubles = Doubles.home - Doubles.visit, 
+                          Triples = Triples.home - Triples.visit,
+                          HR = HR.home - HR.visit, 
+                          RunsScored = RunsScored.home - RunsScored.visit,
+                          SB = SB.home - SB.visit, 
+                          CS = CS.home - CS.visit, 
+                          IP = IP.home - IP.visit, 
+                          RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                          ER = ER.home - ER.visit,
+                          ERA = ERA.home - ERA.visit,
+                          PO = PO.home - PO.visit,
+                          A = A.home - A.visit,
+                          E = E.home - E.visit,
+                          DP = DPPerGame.home - DPPerGame.visit,
+                          FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                          Singles = Singles.home - Singles.visit,
+                          TB = TB.home - TB.visit, 
+                          SlgPct = SlgPct.home - SlgPct.visit,
+                          SuccessRate = SuccessRate.home - SuccessRate.visit,
+                          BA = BA.home - BA.visit)
+Differences_act <-  mutate(Differences_act, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+
+
+
+new_2022 <- Regionals2022[19:24,]
+new_2022$RunsAllowed.visit[which(new_2022$Visiting.Team == "Cal St. Fullerton")] <- 2
+new_2022$RunsAllowed.home[which(new_2022$Home.Team == "Cal St. Fullerton")] <- 2
+new_2022$BA.visit[which(new_2022$Visiting.Team == "Cal St. Fullerton")] <- 0.33
+new_2022$BA.home[which(new_2022$Home.Team == "Cal St. Fullerton")] <- 0.33
+
+Differences_new <- mutate(new_2022, Doubles = Doubles.home - Doubles.visit, 
+                          Triples = Triples.home - Triples.visit,
+                          HR = HR.home - HR.visit, 
+                          RunsScored = RunsScored.home - RunsScored.visit,
+                          SB = SB.home - SB.visit, 
+                          CS = CS.home - CS.visit, 
+                          IP = IP.home - IP.visit, 
+                          RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                          ER = ER.home - ER.visit,
+                          ERA = ERA.home - ERA.visit,
+                          PO = PO.home - PO.visit,
+                          A = A.home - A.visit,
+                          E = E.home - E.visit,
+                          DP = DPPerGame.home - DPPerGame.visit,
+                          FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                          Singles = Singles.home - Singles.visit,
+                          TB = TB.home - TB.visit, 
+                          SlgPct = SlgPct.home - SlgPct.visit,
+                          SuccessRate = SuccessRate.home - SuccessRate.visit,
+                          BA = BA.home - BA.visit)
+Differences_new <-  mutate(Differences_new, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+
+est_2022 <- Regionals2022[19:24,]
+
+#replacing CSUF visit data with estimated goals
+est_2022$HR.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 1.3039820
+est_2022$RunsAllowed.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 2.631781
+est_2022$DPPerGame.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 0.2656308
+est_2022$SlgPct.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 0.5390819
+est_2022$Singles.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 5.301730
+est_2022$Doubles.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 1.456112
+est_2022$Triples.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 0.1414057
+est_2022$BA.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 0.3195273
+
+#replacing CSUF home data with estimated goals
+est_2022$HR.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 1.3039820
+est_2022$RunsAllowed.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 2.631781
+est_2022$DPPerGame.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 0.2656308
+est_2022$SlgPct.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 0.5390819
+est_2022$Singles.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 5.301730
+est_2022$Doubles.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 1.456112
+est_2022$Triples.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 0.1414057
+est_2022$BA.home[which(est_2022$Home.Team == "Cal St. Fullerton")] <- 0.3195273
+
+#recreating Differences data on regional to apply model
+Differences_est <- mutate(est_2022, Doubles = Doubles.home - Doubles.visit, 
+                                             Triples = Triples.home - Triples.visit,
+                                             HR = HR.home - HR.visit, 
+                                             RunsScored = RunsScored.home - RunsScored.visit,
+                                             SB = SB.home - SB.visit, 
+                                             CS = CS.home - CS.visit, 
+                                             IP = IP.home - IP.visit, 
+                                             RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                                             ER = ER.home - ER.visit,
+                                             ERA = ERA.home - ERA.visit,
+                                             PO = PO.home - PO.visit,
+                                             A = A.home - A.visit,
+                                             E = E.home - E.visit,
+                                             DP = DPPerGame.home - DPPerGame.visit,
+                                             FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                                             Singles = Singles.home - Singles.visit,
+                                             TB = TB.home - TB.visit, 
+                                             SlgPct = SlgPct.home - SlgPct.visit,
+                                             SuccessRate = SuccessRate.home - SuccessRate.visit,
+                                             BA = BA.home - BA.visit)
+Differences_est <-  mutate(Differences_est, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+
+csuf_actual <- test6 %>% predict(Differences_act, type = "response")
+csuf_est <- test6 %>% predict(Differences_est, type = "response")
+csuf_new <- test6 %>% predict(Differences_new, type = "response")
+Statistic <- c("CSUF 2022 Actual", "Estimated 2022 Goals", "Changing RA in Model")
+Chances <- c(0.1151719, 0.2503823, 0.203444)
+compare2022AZ <- data.frame(Statistic, Chances)
+compareAZ2 <- compare2022AZ[c(1,2),]
+
+
+Chances_LSU <- c(0.2477817, 0.4580774, 0.3925945)
+compare2022LSU <- data.frame(Statistic, Chances_LSU)
+
+
+Chances_SD <- c(0.4403116, 0.6687409, 0.6068669)
+compare2022SD <- data.frame(Statistic, Chances_SD)
+
+```
+
+```{r, fig.show="hold", out.width = "50%", echo = FALSE}
+# graphs1 <- par(mfrow=c(1,3))
+SD2 <- ggplot(data = compare2022SD, aes(x = Statistic, y = Chances_SD, fill = Statistic)) + 
+  geom_bar(stat = "identity", width = 0.75) +
+  scale_fill_manual(values = c("#FF7900", "#00274C", "#00274C"))+
+  theme(plot.caption = element_text(hjust = 0), legend.position = "none")+
+  labs(title = "Chances of Winning vs. LSU Using Model", caption = "Figure 3.1: Note that the chances of winning increase almost identically when changing only the runs allowed goal\ncompared to setting a goal for every statistic")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances_SD, .11)), 
+            vjust=-0.3, size = 3.5, color = "#00274C")+
+  scale_x_discrete(limits = c("CSUF 2022 Actual", "Estimated 2022 Goals", "Changing RA in Model"))
+SD2
+
+LSU2 <- ggplot(data = compare2022LSU, aes(x = Statistic, y = Chances_LSU, fill = Statistic)) + 
+  geom_bar(stat = "identity", width = 0.75) +
+  scale_fill_manual(values = c("#FF7900", "#00274C", "#00274C"))+
+  theme(plot.caption = element_text(hjust = 0), legend.position = "none")+
+  labs(title = "Chances of Winning vs. LSU Using Model", caption = "Figure 3.1: Note that the chances of winning increase almost identically when changing only the runs allowed goal\ncompared to setting a goal for every statistic")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances_LSU, .11)), 
+            vjust=-0.3, size = 3.5, color = "#00274C")+
+  scale_x_discrete(limits = c("CSUF 2022 Actual", "Estimated 2022 Goals", "Changing RA in Model"))
+LSU2
+
+Arizona.St2 <- ggplot(data = compare2022AZ, aes(x = Statistic, y = Chances, fill = Statistic)) + 
+  geom_bar(stat = "identity", width = 0.75) +
+  scale_fill_manual(values = c("#FF7900", "#00274C", "#00274C"))+
+  theme(plot.caption = element_text(hjust = 0), legend.position = "none")+
+  labs(title = "Chances of Winning vs. Arizona St. Using Model", caption = "Figure 3.1: Note that the chances of winning increase almost identically when changing only the runs allowed goal\ncompared to setting a goal for every statistic")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances, .11)), 
+            vjust=-0.3, size = 3.5, color = "#00274C")+
+  scale_x_discrete(limits = c("CSUF 2022 Actual", "Estimated 2022 Goals", "Changing RA in Model"))
+Arizona.St2
+
+```
+
+\n While decreasing runs allowed does not increase the chances of winning by a large amount, it does almost match the chances of winning by setting goals for every stat. By doing goal setting in this way, the team can tailor the goals by what areas it is strongest in, resulting in a more realistic target. 
+
