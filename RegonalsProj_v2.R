@@ -529,6 +529,7 @@ goal_est <- mutate(goal_est,
                    E=E/G,
                    RunsAllowed=RunsAllowed/G)
 
+
 #include only numeric columns to do mean
 goal_est_num <- goal_est[,sapply(goal_est, is.numeric)]
 
@@ -543,10 +544,63 @@ csuf_goal <- (avg_WCWS + goal_est_num[3,])/2
 goal_est_num[nrow(goal_est_num) + 1,] <- csuf_goal
 
 #Arizona St. Regional
+actual_2022 <- Regionals2022[19:24,]
+
+Differences_act <- mutate(actual_2022, Doubles = Doubles.home - Doubles.visit, 
+                          Triples = Triples.home - Triples.visit,
+                          HR = HR.home - HR.visit, 
+                          RunsScored = RunsScored.home - RunsScored.visit,
+                          SB = SB.home - SB.visit, 
+                          CS = CS.home - CS.visit, 
+                          IP = IP.home - IP.visit, 
+                          RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                          ER = ER.home - ER.visit,
+                          ERA = ERA.home - ERA.visit,
+                          PO = PO.home - PO.visit,
+                          A = A.home - A.visit,
+                          E = E.home - E.visit,
+                          DP = DPPerGame.home - DPPerGame.visit,
+                          FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                          Singles = Singles.home - Singles.visit,
+                          TB = TB.home - TB.visit, 
+                          SlgPct = SlgPct.home - SlgPct.visit,
+                          SuccessRate = SuccessRate.home - SuccessRate.visit,
+                          BA = BA.home - BA.visit)
+Differences_act <-  mutate(Differences_act, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+
+
+
+new_2022 <- Regionals2022[19:24,]
+new_2022$RunsAllowed.visit[which(new_2022$Visiting.Team == "Cal St. Fullerton")] <- 2
+new_2022$RunsAllowed.home[which(new_2022$Home.Team == "Cal St. Fullerton")] <- 2
+new_2022$BA.visit[which(new_2022$Visiting.Team == "Cal St. Fullerton")] <- 0.33
+new_2022$BA.home[which(new_2022$Home.Team == "Cal St. Fullerton")] <- 0.33
+
+Differences_new <- mutate(new_2022, Doubles = Doubles.home - Doubles.visit, 
+                          Triples = Triples.home - Triples.visit,
+                          HR = HR.home - HR.visit, 
+                          RunsScored = RunsScored.home - RunsScored.visit,
+                          SB = SB.home - SB.visit, 
+                          CS = CS.home - CS.visit, 
+                          IP = IP.home - IP.visit, 
+                          RunsAllowed = RunsAllowed.home - RunsAllowed.visit,
+                          ER = ER.home - ER.visit,
+                          ERA = ERA.home - ERA.visit,
+                          PO = PO.home - PO.visit,
+                          A = A.home - A.visit,
+                          E = E.home - E.visit,
+                          DP = DPPerGame.home - DPPerGame.visit,
+                          FieldingPct = FieldingPct.home - FieldingPct.visit, 
+                          Singles = Singles.home - Singles.visit,
+                          TB = TB.home - TB.visit, 
+                          SlgPct = SlgPct.home - SlgPct.visit,
+                          SuccessRate = SuccessRate.home - SuccessRate.visit,
+                          BA = BA.home - BA.visit)
+Differences_new <-  mutate(Differences_new, ConferenceDiff = case_when(ConfNumBids.home > 1 & ConfNumBids.visit == 1 ~ 1, ConfNumBids.home == 1 & ConfNumBids.visit > 1 ~ -1, TRUE ~ 0 ))
+
 est_2022 <- Regionals2022[19:24,]
 which(est_2022$Visiting.Team == "Cal St. Fullerton")
 which(est_2022$Home.Team == "Cal St. Fullerton")
-
 #replacing CSUF visit data with estimated goals
 est_2022$HR.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 1.3039820
 est_2022$RunsAllowed.visit[which(est_2022$Visiting.Team == "Cal St. Fullerton")] <- 2.631781
@@ -593,4 +647,115 @@ Differences_est <-  mutate(Differences_est, ConferenceDiff = case_when(ConfNumBi
 #apply model to regional
 est.goals.prob <- test6 %>% predict(Differences_est, type = "response")
 est.goals.prob
+
+AZRegional <- Regionals2022[19:24,]
+
+ncaa2022_form <- mutate(NCAA2022, Singles = Singles/G,
+TB=TB/G,
+Doubles=Doubles/G,
+Triples=Triples/G,
+HR=HR/G,
+SB=SB/G,
+CS=CS/G,
+RunsScored=RunsScored/G,
+PO=PO/G,
+A=A/G,
+E=E/G,
+RunsAllowed=RunsAllowed/G)
+
+
+csuf2022_2 <- Differences2022[(Differences2022$Home.Team %in% c("LSU", "San Diego St.", "Cal St. Fullerton", "Arizona St.")), ]
+csufprob2 <- test6 %>% predict(csuf2022_2, type = "response")
+csufprob2
+
+csuf2022_3 <- mutate(csuf2022_2, HR = 0)
+csufprob3 <- test6 %>% predict(csuf2022_3, type = "response")
+csufprob3
+
+View(csuf2022_2)
+
+csuf_actual <- test6 %>% predict(Differences_act, type = "response")
+csuf_est <- test6 %>% predict(Differences_est, type = "response")
+csuf_new <- test6 %>% predict(Differences_new, type = "response")
+Statistic <- c("CSUF 2022 Actual", "Estimated 2022 Goals", "Changing RA in Model")
+Chances <- c(0.1151719, 0.2503823, 0.203444)
+compare2022AZ <- data.frame(Statistic, Chances)
+compareAZ2 <- compare2022AZ[c(1,2),]
+View(compare2022)
+
+Chances_LSU <- c(0.2477817, 0.4580774, 0.3925945)
+compare2022LSU <- data.frame(Statistic, Chances_LSU)
+View(compare2022LSU)
+
+Chances_SD <- c(0.4403116, 0.6687409, 0.6068669)
+compare2022SD <- data.frame(Statistic, Chances_SD)
+View(compare2022SD)
+
+
+Arizona.St <- ggplot(data = compare2022AZ[compare2022AZ$Statistic!= "Changing RA in Model",], aes(x = Statistic, y = Chances)) + 
+  geom_bar(stat = "identity", width = 0.5, fill = "#FF7900") +
+  labs(title = "Chances of Winning vs. Arizona St.")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances, .11)), 
+            vjust=1.6, size = 3.5, color = "white")
+Arizona.St
+
+Arizona.St2 <- ggplot(data = compare2022AZ, aes(x = Statistic, y = Chances, fill = Statistic)) + 
+  geom_bar(stat = "identity", width = 0.75) +
+  scale_fill_manual(values = c("#FF7900", "#00274C", "#00274C"))+
+  labs(title = "Chances of Winning vs. Arizona St. Using Model")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances, .11)), 
+            vjust=-0.3, size = 3.5, color = "#00274C")
+Arizona.St2 + scale_x_discrete(limits = c("CSUF 2022 Actual", "Estimated 2022 Goals", "Changing RA in Model"))
+
+
+LSU <- ggplot(data = compare2022LSU[compare2022LSU$Statistic!= "Changing RA in Model",], aes(x = Statistic, y = Chances_LSU)) + 
+  geom_bar(stat = "identity", width = 0.5, fill = "#FF7900") +
+  labs(title = "Chances of Winning vs. LSU")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances_LSU, .11)), 
+            vjust=1.6, size = 3.5, color = "white")
+LSU
+
+LSU2 <- ggplot(data = compare2022LSU, aes(x = Statistic, y = Chances_LSU, fill = Statistic)) + 
+  geom_bar(stat = "identity", width = 0.75) +
+  scale_fill_manual(values = c("#FF7900", "#00274C", "#00274C"))+
+  labs(title = "Chances of Winning vs. LSU Using Model")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances_LSU, .11)), 
+            vjust=-0.3, size = 3.5, color = "#00274C")
+LSU2 + scale_x_discrete(limits = c("CSUF 2022 Actual", "Estimated 2022 Goals", "Changing RA in Model"))
+
+
+SD <- ggplot(data = compare2022SD[compare2022SD$Statistic!= "Changing RA in Model",], aes(x = Statistic, y = Chances_SD)) + 
+  geom_bar(stat = "identity", width = 0.5, fill = "#FF7900") +
+  labs(title = "Chances of Winning vs. San Diego St.")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances_SD, .11)), 
+            vjust=1.6, size = 3.5, color = "white")
+SD
+
+SD2 <- ggplot(data = compare2022SD, aes(x = Statistic, y = Chances_SD, fill = Statistic)) + 
+  geom_bar(stat = "identity", width = 0.75) +
+  scale_fill_manual(values = c("#FF7900", "#00274C", "#00274C"))+
+  labs(title = "Chances of Winning vs. LSU Using Model")+
+  scale_y_continuous(labels = percent_format())+
+  geom_text(aes(label = percent(Chances_SD, .11)), 
+            vjust=-0.3, size = 3.5, color = "#00274C")
+SD2 + scale_x_discrete(limits = c("CSUF 2022 Actual", "Estimated 2022 Goals", "Changing RA in Model"))
+
+RegionalsTable <- RegionalGames_Std[c(1,163,229,359), ] %>% rename(`Regional Host` = Regional.Host, `Game Number` = Game.Number, `Home Team` = Home.Team, `Visiting Team` = Visiting.Team, `Home Score` = Home.Score, `Visiting Score` = Visiting.Score, `Home Team Win?` = Home.Win)
+RegionalsTable %>%
+  gt(caption = "Figure 1: A sample of rows from the dataset. Home team stats are labeled .home and visiting team stats are labeled .visit") %>%
+  cols_align(
+    align = "center"
+  ) %>%
+  tab_header(
+    title = md("**Regional Games and Team Statistics**"),
+    subtitle = "Years 2015 - 2018"
+  ) %>%
+  tab_options(table.border.top.width=3, table.border.top.color="#00274C", table.border.bottom.width=3,table.border.bottom.color="#00274C", 
+              column_labels.border.bottom.color = "#00274C", table_body.hlines.color="#DC8218", column_labels.font.weight="bold")
+
 
