@@ -329,7 +329,7 @@ compare2022SD <- data.frame(Statistic, Chances_SD)
 
 ```
 
-Initially, the statistics from the 2015-2018 seasons were merged with the data from the 2015-2018 Regional games to create one set of data that provides each Regional game for a particular year, who the host, home, and visiting teams were, who won each game, and each team's statistics for that season. Figure 1 provides a snapshot of the data.
+The statistics from the 2015-2018 seasons were merged with the data from the 2015-2018 Regional games to create one set of data that provides each Regional game for a particular year, who the host, home, and visiting teams were, who won each game, and each team's statistics for that season. Figure 1 provides a snapshot of the data.
 
 ```{r echo = FALSE}
 RegionalsTable <- RegionalGames_Std[c(1,163,229,359), ] %>% rename(`Regional Host` = Regional.Host, `Game Number` = Game.Number, `Home Team` = Home.Team, `Visiting Team` = Visiting.Team, `Home Score` = Home.Score, `Visiting Score` = Visiting.Score, `Home Team Win?` = Home.Win)
@@ -348,7 +348,20 @@ RegionalsTable %>%
 ```
 
 
-This larger dataset was used to train models that could ultimately output a team's chances of winning a given game based on their statistics. To create these models, different statistics were input that the models would use to make the prediction. Originally, the models were given statistics from both the home and visiting teams individually (not interacting with each other in the model). For example, one of the first models included both the home and visiting (INSERT ALL STATS HERE). Eventually models were built using the differences between home and visiting teams in those statistics. To narrow down the stats that had the greatest effect on predicting whether the home team would win, we used a method for feature selection called stepAIC.  
+This larger dataset was used to train models that could ultimately output a team's chances of winning a given game based on their statistics. To create these models, different statistics were input that the models would use to make the prediction. Originally, the models were given statistics from both the home and visiting teams individually (not interacting with each other in the model). Eventually models were built using the differences between home and visiting teams in each stat. The final model was created by putting in a group of statistics that encompassed the quality of a team, and then to narrow down the stats that had the greatest effect on predicting whether the home team would win, we used a method for feature selection called stepAIC.  
+
+The stats initially put in the model were:
+a. Home runs
+b. Runs scored
+c. Runs allowed
+d. Double plays
+e. Slugging percentage
+f. Fielding percentage
+g. Singles
+h. Doubles
+i. Triples
+j. Success rate (of stolen bases)
+k. Batting average
 
 Doing this resulted in the following (per game) statistics remaining in the model after adjusting for regional host and conference:
 a. Home runs
@@ -361,8 +374,7 @@ g. Triples
 h. Batting average
 
 
-Once the final model was selected, we validated it using 2019 Regional games and ultimately tested it on the 2022 Regionals. The model resulted in a 75% accuracy when tested on 2022 games, meaning it accurately predicted the outcome of approximately 75% of the 2022 Regional games. Now, using this model, the chances of a home team winning a given game can be predicted with about 75% accuracy.
-
+Once the final model was selected, it was validated using 2019 Regional games and ultimately tested on the 2022 Regionals. The model resulted in a 75% accuracy when tested on 2022 games, meaning it accurately predicted the outcome of approximately 75% of the 2022 Regional games. Now, using this model, the chances of a home team winning a game given both the home and visiting team statistics can be predicted with about 75% accuracy.
 
 Given CSUF's 2022 statistics, the model can be used to estimate the chances CSUF had of winning each game in the Arizona St. regional. This can be compared to the chances CSUF would have had according to the model if they had reached what the estimated goals would have been for each statistic this season. These estimated goals were calculated by averaging the 2021 WCWS per game statistics, and then averaging those with CSUF's 2021 per game statistics to obtain a goal for each stat. Again, each statistic was changed to be per game rather than the total to make for easier comparison. 
 
@@ -372,8 +384,9 @@ par(mfrow=c(1,3))
 SD <- ggplot(data = compare2022SD[compare2022SD$Statistic!= "Changing RA in Model",], aes(x = Statistic, y = Chances_SD)) + 
   geom_bar(stat = "identity", width = 0.5, fill = "#FF7900") +
   theme(plot.caption = element_text(hjust = 0))+
-  labs(title = "Chances of Winning vs. San Diego St.", caption = "Figure 2.1: Note that the chance of winning only increases by ~23%")+
-  scale_y_continuous(labels = percent_format())+
+  labs(title = "Chances of Winning vs. San Diego St.", caption = "Figure 2.1: Note that the chance of winning increases by ~23%")+
+  scale_y_continuous(labels = percent, breaks = seq(0,1.0, by = 0.1))+
+  coord_cartesian(ylim = c(0,1.0)) +
   geom_text(aes(label = percent(Chances_SD, .11)), 
             vjust=-0.3, size = 3.5, color = "#00274C")
 SD
@@ -382,7 +395,8 @@ LSU <- ggplot(data = compare2022LSU[compare2022LSU$Statistic!= "Changing RA in M
   geom_bar(stat = "identity", width = 0.5, fill = "#FF7900") +
   theme(plot.caption = element_text(hjust = 0))+
   labs(title = "Chances of Winning vs. LSU", caption="Figure 2.2: Note that the chance of winning increases by ~21%")+
-  scale_y_continuous(labels = percent_format())+
+  scale_y_continuous(labels = percent, breaks = seq(0,1.0, by = 0.1))+
+  coord_cartesian(ylim = c(0,1.0)) +
   geom_text(aes(label = percent(Chances_LSU, .11)), 
             vjust=-0.3, size = 3.5, color = "#00274C")
 LSU
@@ -390,12 +404,17 @@ LSU
 Arizona.St <- ggplot(data = compare2022AZ[compare2022AZ$Statistic!= "Changing RA in Model",], aes(x = Statistic, y = Chances)) + 
   geom_bar(stat = "identity", width = 0.5, fill = "#FF7900") +
   theme(plot.caption = element_text(hjust = 0))+
-  labs(title = "Chances of Winning vs. Arizona St.", caption="Figure 2.3: Note that the chance of winning only increases by ~13.5%")+
-  scale_y_continuous(labels = percent_format())+
+  labs(title = "Chances of Winning vs. Arizona St.", caption="Figure 2.3: Note that the chance of winning increases by ~13.5%, but remains well under 50%")+
+  scale_y_continuous(labels = percent, breaks = seq(0,1.0, by = 0.1))+
+  coord_cartesian(ylim = c(0,1.0)) +
   geom_text(aes(label = percent(Chances, .11)), 
             vjust=-0.3, size = 3.5, color = "#00274C")
 Arizona.St
 ```
+According to the model, CSUF's statistics for the 2022 season gave them approximately a 44% and 25% chance of beating San Diego St. and LSU respectively. If CSUF had achieved the estimated goals for the season, the model predicts that their chances of winning against the same teams would have increased to 67% and 46%.
+
+Against Arizona St., however, achieving the estimated goals for the season only would have resulted in about a 25% chance of winning.
+
 \newpage If CSUF had met what the estimated goals were for every statistic, their chances of wining the games highlighted above do not increase a notable amount. Rather than using averages to set goals, we can use the model to predict what CSUFs chances of winning would be in a different, potentially more effective way. 
 z
 
