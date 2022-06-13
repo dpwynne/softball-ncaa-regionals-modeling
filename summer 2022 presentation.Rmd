@@ -329,7 +329,7 @@ compare2022SD <- data.frame(Statistic, Chances_SD)
 
 ```
 
-The statistics from the 2015-2018 seasons were merged with the data from the 2015-2018 Regional games to create one set of data that provides each Regional game for a particular year, who the host, home, and visiting teams were, who won each game, and each team's statistics for that season. Figure 1 provides a snapshot of the data.
+The goal was to evaluate the quality of current goal setting methods for CSUF by doing predictive modeling using available data. The statistics from the 2015-2018 seasons were merged with the data from the 2015-2018 Regional games to create one set of data that provides each Regional game for a particular year, who the host, home, and visiting teams were, who won each game, and each team's statistics for that season. Figure 1 provides a snapshot of the data.
 
 ```{r echo = FALSE}
 RegionalsTable <- RegionalGames_Std[c(1,163,229,359), ] %>% rename(`Regional Host` = Regional.Host, `Game Number` = Game.Number, `Home Team` = Home.Team, `Visiting Team` = Visiting.Team, `Home Score` = Home.Score, `Visiting Score` = Visiting.Score, `Home Team Win?` = Home.Win)
@@ -414,6 +414,9 @@ Arizona.St
 According to the model, CSUF's statistics for the 2022 season gave them approximately a 44% and 25% chance of beating San Diego St. and LSU respectively. If CSUF had achieved the estimated goals for the season, the model predicts that their chances of winning against the same teams would have increased to 67% and 46%.
 
 Against Arizona St., however, achieving the estimated goals for the season only would have resulted in about a 25% chance of winning.
+
+Because the model has been chosen by keeping the stats that most influence who wins, it can be used to set goals based on those stats. Then those goals can be input into the model against a given team and the chances of winning according to the model can be predicted. Rather than focusing on every stat, the team can tailor goals to suit strengths and a probability of winning can be calculated to aid in goal setting.
+
 
 \newpage If CSUF had met what the estimated goals were for every statistic, their chances of wining the games highlighted above do not increase a notable amount. Rather than using averages to set goals, we can use the model to predict what CSUFs chances of winning would be in a different, potentially more effective way. 
 z
