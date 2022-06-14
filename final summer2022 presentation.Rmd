@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 ```{r setup2, include = FALSE, echo=FALSE}
 library(tidyverse)
 library(ggplot2)
@@ -17,17 +18,17 @@ library(tidymodels)
 library(parsnip)
 library(dplyr)
 library(gt)
-Softball2015 <- read.csv("Softball2015.csv")
+Softball2015 <- read.csv("Data/Softball2015.csv")
 
-Softball2016 <- read.csv("Softball2016.csv")
+Softball2016 <- read.csv("Data/Softball2016.csv")
 
-Softball2017 <- read.csv("Softball2017.csv")
+Softball2017 <- read.csv("Data/Softball2017.csv")
 
-Softball2018 <- read.csv("Softball2018.csv")
+Softball2018 <- read.csv("Data/Softball2018.csv")
 
 
 #this is the google spreadsheet
-Regionals <- read.csv("NCAA Tournament Games 2015-2018 - Sheet1 new.csv")
+Regionals <- read.csv("Data/NCAA Tournament Games 2015-2018 - Sheet1 new.csv")
 #filters each data set into teams that went to Regionals
 NCAA2015 <- filter(Softball2015, NCAA %in% c("At-large","Auto"))
 NCAA2016 <- filter(Softball2016, NCAA %in% c("At-large","Auto"))
@@ -111,18 +112,18 @@ Differences <- mutate(RegionalGames_Std, Doubles = Doubles.home - Doubles.visit,
 
 
 Differences$Home.Win <- as.factor(Differences$Home.Win)
-Softball2019 <- read.csv("Softball2019.csv")
+Softball2019 <- read.csv("Data/Softball2019.csv")
 
-Softball2021 <- read.csv("Softball2021.csv")
+Softball2021 <- read.csv("Data/Softball2021.csv")
 
-Softball2022 <- read.csv("Softball2022.csv")
+Softball2022 <- read.csv("Data/Softball2022.csv")
 
 
 
 #read in spreadsheets for 2019, 2021, 2022
-Games2019 <- read.csv("NCAA 2019 Regional Games.csv")
-Games2021 <- read.csv("NCAA 2021 Regional Games.csv")
-Games2022 <- read.csv("NCAA 2022 Regional Games.csv")
+Games2019 <- read.csv("Data/NCAA 2019 Regional Games.csv")
+Games2021 <- read.csv("Data/NCAA 2021 Regional Games.csv")
+Games2022 <- read.csv("Data/NCAA 2022 Regional Games.csv")
 
 #filters each data set into teams that went to Regionals
 NCAA2019 <- filter(Softball2019, NCAA %in% c("At-large","Auto"))
